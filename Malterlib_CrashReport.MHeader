@@ -1,0 +1,92 @@
+// Copyright © 2015 Hansoft AB 
+// Distributed under the MIT license, see license text in LICENSE.Malterlib
+
+Import "../Core/Lib_Malterlib.MTarget"
+
+Import "../../SDK/breakpad/Breakpad.MTarget"
+
+%Group "{Malterlib}/{Lib_Malterlib_CrashReport}"
+{
+	%Group CrashReport
+	{
+		%Group Include
+		{
+			Compile.Type "C++"
+			{
+				!!DocumentationEnabled true
+			}
+			%File "Include/Mib/CrashReport/^*"
+		}
+		%File "Source/*"
+		%File "Source/Malterlib_CrashReport_BreakpadUploader.cpp"
+		{
+			Compile.Disabled true
+		}
+		%Group Platform
+		{
+			%File "Source/Platform/*"
+			{
+				Compile.Disabled true
+				{
+					!PlatformFamily "@(PlatformFamilyFromFile)"
+				}
+			}
+		}
+		%Group Documentation
+		{
+			%File "Documentation/*"
+		}
+	}
+}
+
+
+Property
+{
+	MalterlibLibrary_CrashReport true
+	{
+		&
+		{
+			MalterlibLibrary_CrashReport ""
+			MalterlibLibrary_All true
+		}
+	}
+	MalterlibSubLibraries "CrashReport;@(MalterlibSubLibraries)"
+	{
+		!!MalterlibLibrary_CrashReport true
+	}
+//	MalterlibSubLibrarySeparate_Lib_Malterlib_CrashReport true
+	MalterlibIncludeRoots "@('Include'->MakeAbsolute());@(MalterlibIncludeRoots)"
+	{
+		!!MalterlibLibrary_CrashReport true
+	}
+}
+
+%Group "{Test}/{Malterlib_CrashReport}"
+{
+	Property
+	{
+		MalterlibEnableBreakpad true
+		{
+			!!PlatformFamily OSX
+			!!PlatformFamily Linux
+		}
+	}
+	%Dependency Lib_Breakpad_Common
+	{
+		!!MalterlibEnableBreakpad true
+	}
+	%Dependency Lib_Breakpad_Client
+	{
+		!!MalterlibEnableBreakpad true
+	}
+}
+
+Property
+{
+	!!MalterlibEnableInternalTests true
+	
+	MalterlibTests "Malterlib_CrashReport;@(MalterlibTests)"
+	MalterlibTestFiles_Malterlib_CrashReport "@('Test/*'->MakeAbsolute())"
+	MalterlibTestExtraGroups_Malterlib_CrashReport "{Test}/{Malterlib_CrashReport}"
+	
+}
