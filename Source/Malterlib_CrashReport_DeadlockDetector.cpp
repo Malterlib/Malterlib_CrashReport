@@ -1,4 +1,4 @@
-﻿// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB 
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include <Mib/Core/Core>
@@ -10,7 +10,7 @@ namespace NMib
 	{
 		CDeadlockDetector::CDeadlockDetector()
 		{
-
+			mp_Clock.f_Start();
 		}
 
 		CDeadlockDetector::~CDeadlockDetector()
@@ -26,8 +26,8 @@ namespace NMib
 		void CDeadlockDetector::f_Pulse()
 		{
 			DMibLock(mp_Lock);
-			mp_LastPulse = NTime::CTime::fs_NowUTC();
-			mp_SavedSpanCheck = NTime::CTimeSpanConvert::fs_CreateSpan(0,0);
+			mp_LastPulse = mp_Clock.f_GetTime();
+			mp_SavedSpanCheck = 0;
 		}
 
 		void CDeadlockDetector::f_SetTimeout(fp64 _Timeout)
@@ -47,20 +47,20 @@ namespace NMib
 
 		bint CDeadlockDetector::f_IsDeadlocked()
 		{
-			NTime::CTime LastPulse;
+			fp64 LastPulse;
 
 			{
 				DMibLock(mp_Lock);
 				LastPulse = mp_LastPulse;
 			}
 
-			NTime::CTime Now = NTime::CTime::fs_NowUTC();
+			fp64 Now = mp_Clock.f_GetTime();
 			fp64 Timeout = mp_Timeout * 0.5;
 
-			NTime::CTimeSpan SpanPulse = Now - LastPulse;
-			NTime::CTimeSpan SpanAdjusted = SpanPulse;
+			fp64 SpanPulse = Now - LastPulse;
+			fp64 SpanAdjusted = SpanPulse;
 
-			if (SpanAdjusted.f_GetSecondsFraction() < Timeout)
+			if (SpanAdjusted < Timeout)
 				return false;
 
 			return true;
@@ -69,15 +69,15 @@ namespace NMib
 		aint CDeadlockDetector::f_Main()
 		{
 			m_EventWantQuit.f_ReportTo(&mp_Event);
-			mp_LastCheck = mp_LastPulse = NTime::CTime::fs_NowUTC();
-			mp_SavedSpanCheck = NTime::CTimeSpanConvert::fs_CreateSpan(0,0);
+			mp_LastCheck = mp_LastPulse = mp_Clock.f_GetTime();
+			mp_SavedSpanCheck = 0;
 
 			while (f_GetState() != NThread::EThreadState_EventWantQuit)
 			{
-				NTime::CTime Now = NTime::CTime::fs_NowUTC();
+				fp64 Now = mp_Clock.f_GetTime();
 
-				NTime::CTime LastPulse;
-				NTime::CTimeSpan LastSpanCheck;
+				fp64 LastPulse;
+				fp64 LastSpanCheck;
 
 				{
 					DMibLock(mp_Lock);
@@ -85,11 +85,11 @@ namespace NMib
 					LastSpanCheck = mp_SavedSpanCheck;
 				}
 
-				NTime::CTimeSpan SpanCheck = Now - mp_LastCheck;
-				NTime::CTimeSpan SpanPulse = Now - LastPulse;
+				fp64 SpanCheck = Now - mp_LastCheck;
+				fp64 SpanPulse = Now - LastPulse;
 
 				
-				if (SpanCheck.f_GetSecondsFraction() > mp_Timeout * 0.5 * NTime::CSystem_Time::fs_GetTimeSpeed())
+				if (SpanCheck > mp_Timeout * 0.5 * NTime::CSystem_Time::fs_GetTimeSpeed())
 				{
 					DMibLock(mp_Lock);
 					mp_SavedSpanCheck += SpanCheck;
@@ -99,9 +99,9 @@ namespace NMib
 
 				mp_LastCheck = Now;
 
-				NTime::CTimeSpan SpanAdjusted = SpanPulse - SpanCheck;
+				fp64 SpanAdjusted = SpanPulse - SpanCheck;
 
-				if (SpanAdjusted.f_GetSecondsFraction() > mp_Timeout * NTime::CSystem_Time::fs_GetTimeSpeed())
+				if (SpanAdjusted > mp_Timeout * NTime::CSystem_Time::fs_GetTimeSpeed())
 				{
 					if (!*mp_pPause)
 					{
@@ -124,8 +124,8 @@ namespace NMib
 					}
 					{
 						DMibLock(mp_Lock);
-						mp_LastPulse = NTime::CTime::fs_NowUTC();
-						mp_SavedSpanCheck = NTime::CTimeSpanConvert::fs_CreateSpan(0,0);
+						mp_LastPulse = mp_Clock.f_GetTime();
+						mp_SavedSpanCheck = 0.0;
 					}
 				}
 

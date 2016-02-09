@@ -37,10 +37,12 @@ namespace NMib
 			NAtomic::TCAtomicAggregate<aint> *mp_pPause;
 
 			NThread::CMutual mp_Lock;
+			
+			NTime::CClock mp_Clock;
 
-			NTime::CTime mp_LastPulse;
-			NTime::CTime mp_LastCheck;
-			NTime::CTimeSpan mp_SavedSpanCheck;
+			fp64 mp_LastPulse;
+			fp64 mp_LastCheck;
+			fp64 mp_SavedSpanCheck;
 
 		};
 	}
