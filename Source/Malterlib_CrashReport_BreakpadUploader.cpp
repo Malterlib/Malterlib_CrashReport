@@ -237,7 +237,7 @@ namespace NMib
 				fg_SendCrashReports(_DumpDir, DMibBreakpadUploadServer, _Email, _oErrors);
 			};
 			
-			NMib::NStr::CStr MalterlibCrashDumpDir = NSys::fg_Process_GetEnvironmentVariable(CStr("MalterlibCrashDumpDir"));
+			NMib::NStr::CStr MalterlibCrashDumpDir = fg_GetSys()->f_GetEnvironmentVariable("MalterlibCrashDumpDir");
 			if (!MalterlibCrashDumpDir.f_IsEmpty())
 				fUploadDumps(MalterlibCrashDumpDir);
 
@@ -279,7 +279,7 @@ namespace NMib
 				return false;
 			};
 
-			NMib::NStr::CStr MalterlibCrashDumpDir = NSys::fg_Process_GetEnvironmentVariable(CStr("MalterlibCrashDumpDir"));
+			NMib::NStr::CStr MalterlibCrashDumpDir = fg_GetSys()->f_GetEnvironmentVariable("MalterlibCrashDumpDir");
 			if (!MalterlibCrashDumpDir.f_IsEmpty())
 			{
 				if (fl_DirectoryHasDumps(MalterlibCrashDumpDir))
