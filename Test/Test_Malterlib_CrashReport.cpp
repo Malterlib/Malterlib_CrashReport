@@ -42,13 +42,12 @@ namespace
 					void *pPointer;
 					for (mint i = 0; i < 10000000; ++i)
 					{
-						mint Size = TestSize;
-						pPointer = NMib::NMem::fg_Alloc(Size);
-						NMib::NMem::fg_Free(pPointer);
+						pPointer = NMib::NMem::fg_Alloc(TestSize);
+						NMib::NMem::fg_Free(pPointer, TestSize);
 					}
 					Cycles.f_Stop();
 
-					NMib::NMem::fg_Free(pPointer2);
+					NMib::NMem::fg_Free(pPointer2, Size2);
 					
 					DMibConOut("{} cycles per fg_Alloc/fg_Free pair{\n}", fp64(Cycles.f_GetCycles()) / fp64(10000000.0) << pPointer << pPointer2);
 				}
