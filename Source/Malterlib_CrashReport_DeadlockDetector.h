@@ -1,50 +1,45 @@
-﻿// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB 
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #pragma once
 
 #include <Mib/Core/Core>
 
-namespace NMib
+namespace NMib::NCrashReport
 {
-	namespace NSystem
+	class CDeadlockDetector : public NThread::CThread
 	{
-		class CDeadlockDetector : public NThread::CThread
-		{
-		public:
+	public:
 
-			CDeadlockDetector();
-			~CDeadlockDetector();
+		CDeadlockDetector();
+		~CDeadlockDetector();
 
-			aint f_Main();
+		aint f_Main();
 
-			virtual NStr::CStr f_GetThreadName();
-			void f_Pulse();
-			void f_SetTimeout(fp64 _Timeout);
+		virtual NStr::CStr f_GetThreadName();
+		void f_Pulse();
+		void f_SetTimeout(fp64 _Timeout);
 
-			aint f_LastPauseValue();
-			void f_AddPauseValue();
+		aint f_LastPauseValue();
+		void f_AddPauseValue();
 
-			bint f_IsDeadlocked();
+		bint f_IsDeadlocked();
 
-		protected:
+	protected:
 
-			virtual bint fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message) = 0;
+		virtual bint fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message) = 0;
 
-			NThread::CEventAutoResetReportable mp_Event;
-			fp64 mp_Timeout;
+		NThread::CEventAutoResetReportable mp_Event;
+		fp64 mp_Timeout;
 
-			NAtomic::TCAtomicAggregate<aint> *mp_pPause;
+		NAtomic::TCAtomicAggregate<aint> *mp_pPause;
 
-			NThread::CMutual mp_Lock;
-			
-			NTime::CClock mp_Clock;
+		NThread::CMutual mp_Lock;
 
-			fp64 mp_LastPulse;
-			fp64 mp_LastCheck;
-			fp64 mp_SavedSpanCheck;
+		NTime::CClock mp_Clock;
 
-		};
-	}
+		fp64 mp_LastPulse;
+		fp64 mp_LastCheck;
+		fp64 mp_SavedSpanCheck;
+	};
 }
-
