@@ -24,7 +24,7 @@ namespace NMib::NCrashReport::NPlatform
 
 		NAtomic::TCAtomicAggregate<aint> mp_Pause;
 
-		inline_never bint fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message);
+		inline_never bool fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message);
 	};
 
 	struct CSubSystem_CrashReport_Platform_OSX_DeadlockDetector : public CSubSystem
@@ -68,7 +68,7 @@ namespace NMib::NCrashReport::NPlatform
 			DMibSafeCheck(LastValue > 0, "Pause error");
 		}
 
-		bint f_Debug_IsDeadlocked()
+		bool f_Debug_IsDeadlocked()
 		{
 			return m_DeadlockDetector.f_IsDeadlocked();
 		}
@@ -76,7 +76,7 @@ namespace NMib::NCrashReport::NPlatform
 
 	TCSubSystem<CSubSystem_CrashReport_Platform_OSX_DeadlockDetector, ESubSystemDestruction_BeforeNonTrackedMemoryManager> g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector = {DAggregateInit};
 
-	inline_never bint CPosixDeadlockDetector::fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message)
+	inline_never bool CPosixDeadlockDetector::fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message)
 	{
 		auto &SubSystem = *g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector;
 		if (SubSystem.m_pDeadlockNotifyFunction)
@@ -86,7 +86,7 @@ namespace NMib::NCrashReport::NPlatform
 	}
 }
 
-bint NMib::NSys::fg_Debug_IsDeadlocked()
+bool NMib::NSys::fg_Debug_IsDeadlocked()
 {
 	return NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector->f_Debug_IsDeadlocked();
 }

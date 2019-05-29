@@ -23,11 +23,11 @@ namespace NMib::NCrashReport
 		aint f_LastPauseValue();
 		void f_AddPauseValue();
 
-		bint f_IsDeadlocked();
+		bool f_IsDeadlocked();
 
 	protected:
 
-		virtual bint fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message) = 0;
+		virtual bool fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message) = 0;
 
 		NThread::CEventAutoResetReportable mp_Event;
 		fp64 mp_Timeout;

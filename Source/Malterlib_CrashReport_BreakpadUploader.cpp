@@ -29,7 +29,7 @@ namespace NMib::NCrashReport
 			curl_global_cleanup();
 		}
 
-		bint f_SendCrashReports(NMib::NStr::CStr const& _DumpDirectory, CUploadContext const& _Context, NMib::NStr::CStr& _oErrors)
+		bool f_SendCrashReports(NMib::NStr::CStr const& _DumpDirectory, CUploadContext const& _Context, NMib::NStr::CStr& _oErrors)
 		{
 			NMib::NStr::CStr DumpDirectory = _DumpDirectory;
 			if (!DumpDirectory.f_GetLen() || DumpDirectory[DumpDirectory.f_GetLen()-1] != '/')
@@ -80,7 +80,7 @@ namespace NMib::NCrashReport
 			return false;
 		}
 
-		bint f_SendCrashReport(CUploadContext const& _Context, NMib::NStr::CStr& _oErrors)
+		bool f_SendCrashReport(CUploadContext const& _Context, NMib::NStr::CStr& _oErrors)
 		{
 			if (!NMib::NFile::CFile::fs_FileExists(_Context.m_PathToDumpFile, NMib::NFile::EFileAttrib_File))
 			{
@@ -173,7 +173,7 @@ namespace NMib::NCrashReport
 
 
 			CURLcode Result = curl_easy_perform(pCurl);
-			bint bSuccess = Result == CURLE_OK;
+			bool bSuccess = Result == CURLE_OK;
 
 			if (!bSuccess)
 			{
@@ -214,17 +214,17 @@ namespace NMib::NCrashReport
 
 	}
 
-	bint CUploader::f_SendCrashReports(NMib::NStr::CStr const& _DumpDirectory, CUploadContext const& _Context, NMib::NStr::CStr& _oErrors)
+	bool CUploader::f_SendCrashReports(NMib::NStr::CStr const& _DumpDirectory, CUploadContext const& _Context, NMib::NStr::CStr& _oErrors)
 	{
 		return mp_pD->f_SendCrashReports(_DumpDirectory, _Context, _oErrors);
 	}
 
-	bint CUploader::f_SendCrashReport(CUploadContext const& _Context, NStr::CStr& _oErrors)
+	bool CUploader::f_SendCrashReport(CUploadContext const& _Context, NStr::CStr& _oErrors)
 	{
 		return mp_pD->f_SendCrashReport(_Context, _oErrors);
 	}
 
-	bint fg_SendCrashReports(NMib::NStr::CStr const& _Email, NMib::NStr::CStr& _oErrors)
+	bool fg_SendCrashReports(NMib::NStr::CStr const& _Email, NMib::NStr::CStr& _oErrors)
 	{
 		auto fUploadDumps = [&] (NMib::NStr::CStr const& _DumpDir)
 		{
@@ -246,7 +246,7 @@ namespace NMib::NCrashReport
 		return _oErrors.f_IsEmpty();
 	}
 
-	bint fg_SendCrashReports(NMib::NStr::CStr const& _DumpDirectory, NMib::NStr::CStr const& _CrashServer, NMib::NStr::CStr const& _Email, NMib::NStr::CStr& _oErrors)
+	bool fg_SendCrashReports(NMib::NStr::CStr const& _DumpDirectory, NMib::NStr::CStr const& _CrashServer, NMib::NStr::CStr const& _Email, NMib::NStr::CStr& _oErrors)
 	{
 		CUploadContext Context;
 		Context.m_Parameters["email"] = _Email;
@@ -256,15 +256,15 @@ namespace NMib::NCrashReport
 		return Uploader.f_SendCrashReports(_DumpDirectory, Context, _oErrors);
 	}
 
-	bint fg_SendCrashReport(CUploadContext const& _Context, NMib::NStr::CStr& _oErrors)
+	bool fg_SendCrashReport(CUploadContext const& _Context, NMib::NStr::CStr& _oErrors)
 	{
 		CUploader Uploader;
 		return Uploader.f_SendCrashReport(_Context, _oErrors);
 	}
 
-	bint fg_CheckForCrashDumps()
+	bool fg_CheckForCrashDumps()
 	{
-		auto fl_DirectoryHasDumps = [](NMib::NStr::CStr const& _DumpDir) -> bint
+		auto fl_DirectoryHasDumps = [](NMib::NStr::CStr const& _DumpDir) -> bool
 		{
 			NMib::NContainer::TCVector<CStr> lDumpFiles = NMib::NFile::CFile::fs_FindFiles(_DumpDir + "/*", EFileAttrib_File, true);
 			for (auto iFile = lDumpFiles.f_GetIterator(); iFile; ++iFile)

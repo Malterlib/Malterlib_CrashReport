@@ -22,7 +22,7 @@ namespace NMib::NCrashReport::NPlatform
 
 		static INT_PTR CALLBACK fsp_HandleMessages(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 		LRESULT fp_DisplayMyMessage(HINSTANCE hinst, HWND hwndOwner, LPCSTR lpszMessage, LPCSTR lpszTitle);
-		inline_never bint fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message);
+		inline_never bool fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message);
 
 		enum
 		{
@@ -77,7 +77,7 @@ namespace NMib::NCrashReport::NPlatform
 			DMibSafeCheck(LastValue > 0, "Pause error");
 		}
 
-		bint f_Debug_IsDeadlocked()
+		bool f_Debug_IsDeadlocked()
 		{
 			return m_DeadlockDetector.f_IsDeadlocked();
 		}
@@ -174,7 +174,7 @@ namespace NMib::NCrashReport::NPlatform
 			break;
 		case WM_TIMER:
 			{
-				bint bDeadlocked = SubSystem.m_DeadlockDetector.f_IsDeadlocked();
+				bool bDeadlocked = SubSystem.m_DeadlockDetector.f_IsDeadlocked();
 				if (!bDeadlocked)
 				{
 					EndDialog(hwndDlg, 1);
@@ -350,7 +350,7 @@ namespace NMib::NCrashReport::NPlatform
 		return ret;
 	}
 
-	inline_never bint CWindowsDeadlockDetector::fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message)
+	inline_never bool CWindowsDeadlockDetector::fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message)
 	{
 		auto &SubSystem = *g_SubSystem_CrashReport_Platform_Windows_DeadlockDetector;
 		if (SubSystem.m_pDeadlockNotifyFunction)
@@ -369,7 +369,7 @@ namespace NMib::NCrashReport::NPlatform
 	}
 }
 
-bint NMib::NSys::fg_Debug_IsDeadlocked()
+bool NMib::NSys::fg_Debug_IsDeadlocked()
 {
 	return NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_Windows_DeadlockDetector->f_Debug_IsDeadlocked();
 }

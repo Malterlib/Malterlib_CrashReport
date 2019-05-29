@@ -43,7 +43,7 @@ namespace NMib::NCrashReport
 		mp_pPause->f_FetchAdd(1);
 	}
 
-	bint CDeadlockDetector::f_IsDeadlocked()
+	bool CDeadlockDetector::f_IsDeadlocked()
 	{
 		fp64 LastPulse;
 
@@ -112,7 +112,7 @@ namespace NMib::NCrashReport
 #if defined(DMibDebug) && 0
 					DMibDTrace("Deadlock detector would have activated" DMibNewLine, 0);
 #else
-					bint bDaemon = fg_GetSys()->f_GetRunningAsDaemon();
+					bool bDaemon = fg_GetSys()->f_GetRunningAsDaemon();
 
 					if (bDaemon || !fp_DisplayMessage(Title, Message))
 					{
