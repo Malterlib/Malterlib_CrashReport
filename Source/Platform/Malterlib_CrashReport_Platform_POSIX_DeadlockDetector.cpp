@@ -74,7 +74,9 @@ namespace NMib::NCrashReport::NPlatform
 		}
 	};
 
-	TCSubSystem<CSubSystem_CrashReport_Platform_OSX_DeadlockDetector, ESubSystemDestruction_BeforeNonTrackedMemoryManager> g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector = {DAggregateInit};
+	constinit TCSubSystem<CSubSystem_CrashReport_Platform_OSX_DeadlockDetector, ESubSystemDestruction_BeforeNonTrackedMemoryManager>
+		g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector = {DAggregateInit}
+	;
 
 	inline_never bool CPosixDeadlockDetector::fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message)
 	{

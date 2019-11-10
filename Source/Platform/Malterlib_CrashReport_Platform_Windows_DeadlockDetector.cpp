@@ -83,7 +83,9 @@ namespace NMib::NCrashReport::NPlatform
 		}
 	};
 
-	TCSubSystem<CSubSystem_CrashReport_Platform_Windows_DeadlockDetector, ESubSystemDestruction_BeforeNonTrackedMemoryManager> g_SubSystem_CrashReport_Platform_Windows_DeadlockDetector = {DAggregateInit};
+	constinit TCSubSystem<CSubSystem_CrashReport_Platform_Windows_DeadlockDetector, ESubSystemDestruction_BeforeNonTrackedMemoryManager>
+		g_SubSystem_CrashReport_Platform_Windows_DeadlockDetector = {DAggregateInit}
+	;
 
 	CWindowsDeadlockDetector::CWindowsDeadlockDetector()
 	{
