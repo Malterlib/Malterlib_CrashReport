@@ -7,9 +7,9 @@ Import "../../SDK/breakpad/Breakpad.MTarget"
 
 %Group "{Malterlib}/{Lib_Malterlib_CrashReport}"
 {
-	%Group CrashReport
+	%Group "CrashReport"
 	{
-		%Group Include
+		%Group "Include"
 		{
 			Compile.Type "C++"
 			{
@@ -22,7 +22,7 @@ Import "../../SDK/breakpad/Breakpad.MTarget"
 		{
 			Compile.Disabled true
 		}
-		%Group Platform
+		%Group "Platform"
 		{
 			%File "Source/Platform/*"
 			{
@@ -32,7 +32,7 @@ Import "../../SDK/breakpad/Breakpad.MTarget"
 				}
 			}
 		}
-		%Group Documentation
+		%Group "Documentation"
 		{
 			%File "Documentation/*"
 		}
@@ -67,15 +67,15 @@ Property
 	{
 		MalterlibEnableBreakpad true
 		{
-			!!PlatformFamily OSX
-			!!PlatformFamily Linux
+			!!PlatformFamily "OSX"
+			!!PlatformFamily "Linux"
 		}
 	}
-	%Dependency Lib_Breakpad_Common
+	%Dependency "Lib_Breakpad_Common"
 	{
 		!!MalterlibEnableBreakpad true
 	}
-	%Dependency Lib_Breakpad_Client
+	%Dependency "Lib_Breakpad_Client"
 	{
 		!!MalterlibEnableBreakpad true
 	}
