@@ -18,6 +18,12 @@ namespace
 			DMibTestSuite(CTestCategory("Crash") << CTestGroup("Manual"))
 			{
 				DMibTrace("Crashing\n", 0);
+				int *pTest = 0;
+				*pTest = 0;
+			};
+			DMibTestSuite(CTestCategory("Breakpoint") << CTestGroup("Manual"))
+			{
+				DMibTrace("Crashing\n", 0);
 				DMibPDebugBreak;
 			};
 			DMibTestSuite(CTestCategory("Deadlock") << CTestGroup("Manual"))

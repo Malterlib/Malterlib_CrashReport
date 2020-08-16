@@ -71,14 +71,6 @@ Property
 			!!PlatformFamily "Linux"
 		}
 	}
-	%Dependency "Lib_Breakpad_Common"
-	{
-		!!MalterlibEnableBreakpad true
-	}
-	%Dependency "Lib_Breakpad_Client"
-	{
-		!!MalterlibEnableBreakpad true
-	}
 }
 
 Property
