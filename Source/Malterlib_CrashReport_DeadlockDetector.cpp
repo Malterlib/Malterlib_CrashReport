@@ -66,7 +66,6 @@ namespace NMib::NCrashReport
 
 	aint CDeadlockDetector::f_Main()
 	{
-		m_EventWantQuit.f_ReportTo(&mp_Event);
 		mp_LastCheck = mp_LastPulse = mp_Clock.f_GetTime();
 		mp_SavedSpanCheck = 0;
 
@@ -127,7 +126,7 @@ namespace NMib::NCrashReport
 				}
 			}
 
-			mp_Event.f_WaitTimeout(2.0);
+			m_EventWantQuit.f_WaitTimeout(2.0);
 		}
 
 		return 0;

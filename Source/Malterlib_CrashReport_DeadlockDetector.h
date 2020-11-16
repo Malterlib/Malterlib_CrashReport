@@ -29,7 +29,6 @@ namespace NMib::NCrashReport
 
 		virtual bool fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message) = 0;
 
-		NThread::CEventAutoResetReportable mp_Event;
 		fp64 mp_Timeout;
 
 		NAtomic::TCAtomicAggregate<aint> *mp_pPause;
