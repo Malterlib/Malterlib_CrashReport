@@ -28,7 +28,7 @@ Import "../../SDK/breakpad/Breakpad.MTarget"
 			{
 				Compile.Disabled true
 				{
-					!PlatformFamily "@(PlatformFamilyFromFile)"
+					!PlatformFamily PlatformFamilyFromFile
 				}
 			}
 		}
@@ -42,20 +42,13 @@ Import "../../SDK/breakpad/Breakpad.MTarget"
 
 Property
 {
-	MalterlibLibrary_CrashReport true
-	{
-		&
-		{
-			MalterlibLibrary_CrashReport ""
-			MalterlibLibrary_All true
-		}
-	}
-	MalterlibSubLibraries "CrashReport;@(MalterlibSubLibraries)"
+	MalterlibLibrary_CrashReport define bool = MalterlibLibrary_All
+	MalterlibSubLibraries =+ "CrashReport"
 	{
 		!!MalterlibLibrary_CrashReport true
 	}
-//	MalterlibSubLibrarySeparate_Lib_Malterlib_CrashReport true
-	MalterlibIncludeRoots "@('Include'->MakeAbsolute());@(MalterlibIncludeRoots)"
+//	MalterlibSubLibrarySeparate_Lib_Malterlib_CrashReport define bool = true
+	MalterlibIncludeRoots =+ "Include"->MakeAbsolute()
 	{
 		!!MalterlibLibrary_CrashReport true
 	}
@@ -77,8 +70,8 @@ Property
 {
 	!!MalterlibEnableInternalTests true
 	
-	MalterlibTests "Malterlib_CrashReport;@(MalterlibTests)"
-	MalterlibTestFiles_Malterlib_CrashReport "@('Test/*'->MakeAbsolute())"
-	MalterlibTestExtraGroups_Malterlib_CrashReport "{Test}/{Malterlib_CrashReport}"
+	MalterlibTests =+ "Malterlib_CrashReport"
+ 	MalterlibTestFiles_Malterlib_CrashReport define [type(CEntity)] = ["Test/*"->MakeAbsolute()]
+	MalterlibTestExtraGroups_Malterlib_CrashReport define [string] = ["{Test}/{Malterlib_CrashReport}"]
 	
 }
