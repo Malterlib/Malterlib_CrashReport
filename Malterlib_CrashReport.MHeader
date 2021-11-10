@@ -3,7 +3,16 @@
 
 Import "../Core/Lib_Malterlib.MTarget"
 
-Import "../../SDK/breakpad/Breakpad.MTarget"
+%Repository "breakpad"
+{
+	Repository
+	{
+		Type "External"
+		Remotes =+ {Name: "upstream", URL: "https://github.com/google/breakpad.git"}
+	}
+}
+
+Import "../../External/breakpad/Breakpad.MTarget"
 
 %Group "{Malterlib}/{Lib_Malterlib_CrashReport}"
 {
