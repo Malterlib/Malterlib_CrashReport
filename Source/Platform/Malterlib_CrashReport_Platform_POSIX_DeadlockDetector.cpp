@@ -27,7 +27,7 @@ namespace NMib::NCrashReport::NPlatform
 		inline_never bool fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message);
 	};
 
-	struct CSubSystem_CrashReport_Platform_OSX_DeadlockDetector : public CSubSystem
+	struct CSubSystem_CrashReport_Platform_MacOS_DeadlockDetector : public CSubSystem
 	{
 		CPosixDeadlockDetector m_DeadlockDetector;
 		NSys::FDeadlockUserNotify *m_pDeadlockNotifyFunction = nullptr;
@@ -74,13 +74,13 @@ namespace NMib::NCrashReport::NPlatform
 		}
 	};
 
-	constinit TCSubSystem<CSubSystem_CrashReport_Platform_OSX_DeadlockDetector, ESubSystemDestruction_BeforeNonTrackedMemoryManager>
-		g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector = {DAggregateInit}
+	constinit TCSubSystem<CSubSystem_CrashReport_Platform_MacOS_DeadlockDetector, ESubSystemDestruction_BeforeNonTrackedMemoryManager>
+		g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector = {DAggregateInit}
 	;
 
 	inline_never bool CPosixDeadlockDetector::fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message)
 	{
-		auto &SubSystem = *g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector;
+		auto &SubSystem = *g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector;
 		if (SubSystem.m_pDeadlockNotifyFunction)
 			return !SubSystem.m_pDeadlockNotifyFunction();
 
@@ -90,35 +90,35 @@ namespace NMib::NCrashReport::NPlatform
 
 bool NMib::NSys::fg_Debug_IsDeadlocked()
 {
-	return NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector->f_Debug_IsDeadlocked();
+	return NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector->f_Debug_IsDeadlocked();
 }
 
 void NMib::NSys::fg_Debug_SetDeadlockNotifyFunction(FDeadlockUserNotify *_pCrashDumpUserNotify)
 {
-	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector->f_Debug_SetDeadlockUserNotifyFunction(_pCrashDumpUserNotify);
+	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector->f_Debug_SetDeadlockUserNotifyFunction(_pCrashDumpUserNotify);
 }
 
 void NMib::NSys::fg_Debug_PauseDeadlockDetector()
 {
-	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector->f_Debug_PauseDeadlockDetector();
+	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector->f_Debug_PauseDeadlockDetector();
 }
 
 void NMib::NSys::fg_Debug_ResumeDeadlockDetector()
 {
-	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector->f_Debug_ResumeDeadlockDetector();
+	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector->f_Debug_ResumeDeadlockDetector();
 }
 
 void NMib::NSys::fg_Debug_StartDeadlockDetector(fp64 _Timeout)
 {
-	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector->f_Debug_StartDeadlockDetector(_Timeout);
+	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector->f_Debug_StartDeadlockDetector(_Timeout);
 }
 
 void NMib::NSys::fg_Debug_NotDeadlocked()
 {
-	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector->f_Debug_NotDeadlocked();
+	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector->f_Debug_NotDeadlocked();
 }
 
 void NMib::NSys::fg_Debug_StopDeadlockDetector()
 {
-	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_OSX_DeadlockDetector->f_Debug_StopDeadlockDetector();
+	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector->f_Debug_StopDeadlockDetector();
 }
