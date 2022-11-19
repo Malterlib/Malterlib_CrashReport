@@ -51,12 +51,12 @@ Import "../../External/breakpad/Breakpad.MTarget"
 
 Property
 {
-	MalterlibLibrary_CrashReport define bool = MalterlibLibrary_All
+	MalterlibLibrary_CrashReport: bool = MalterlibLibrary_All
 	MalterlibSubLibraries =+ "CrashReport"
 	{
 		!!MalterlibLibrary_CrashReport true
 	}
-//	MalterlibSubLibrarySeparate_Lib_Malterlib_CrashReport define bool = true
+//	MalterlibSubLibrarySeparate_Lib_Malterlib_CrashReport: bool = true
 	MalterlibIncludeRoots =+ "Include"->MakeAbsolute()
 	{
 		!!MalterlibLibrary_CrashReport true
@@ -80,7 +80,7 @@ Property
 	!!MalterlibEnableInternalTests true
 	
 	MalterlibTests =+ "Malterlib_CrashReport"
- 	MalterlibTestFiles_Malterlib_CrashReport define [type(CEntity)] = ["Test/*"->MakeAbsolute()]
-	MalterlibTestExtraGroups_Malterlib_CrashReport define [string] = ["{Test}/{Malterlib_CrashReport}"]
+ 	MalterlibTestFiles_Malterlib_CrashReport: [type(CEntity)] = ["Test/*"->MakeAbsolute()]
+	MalterlibTestExtraGroups_Malterlib_CrashReport: [string] = ["{Test}/{Malterlib_CrashReport}"]
 	
 }
