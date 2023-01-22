@@ -18,8 +18,10 @@ namespace
 			DMibTestSuite(CTestCategory("Crash") << CTestGroup("Manual"))
 			{
 				DMibTrace("Crashing\n", 0);
+#ifndef DMibClangAnalyzerWorkaround
 				int *pTest = 0;
 				*pTest = 0;
+#endif
 			};
 			DMibTestSuite(CTestCategory("Breakpoint") << CTestGroup("Manual"))
 			{
