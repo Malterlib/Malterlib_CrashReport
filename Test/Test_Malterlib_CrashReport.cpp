@@ -3,6 +3,11 @@
 
 #include "stdlib.h"
 
+#ifdef DPlatformFamily_macOS
+	#include <memory>
+	#include <malloc/malloc.h>
+#endif
+
 namespace
 {
 	class CCrashDumping_Tests : public CTest
@@ -31,11 +36,11 @@ namespace
 			DMibTestSuite(CTestCategory("Deadlock") << CTestGroup("Manual"))
 			{
 				NMib::NSys::fg_Debug_StartDeadlockDetector(5.0f);
-				while (true)
-				{
-				}
+				volatile bool bValue = true;
+				while (bValue)
+					bValue = true;
 			};
-			DMibTestSuite(CTestCategory("free perf") << CTestGroup("Manual"))
+			DMibTestSuite(CTestCategory("Free Perf") << CTestGroup("Manual"))
 			{
 				auto Checkout = NMib::fg_GetSys()->f_MemoryManager_Checkout();
 				
@@ -77,6 +82,27 @@ namespace
 					DMibConOut("{} cycles per malloc/free pair{\n}", fp64(Cycles.f_GetCycles()) / fp64(10000000.0) << pPointer << pPointer2);
 				}
 			};
+#ifdef DPlatformFamily_macOS
+			DMibTestSuite("TrySize")
+			{
+				void *pMemory = malloc(5);
+				auto Cleanup = NMib::g_OnScopeExit / [&]
+					{
+						free(pMemory);
+					}
+				;
+				auto Size = malloc_size(pMemory);
+				DMibExpect(Size, >, 0);
+
+				auto Size2 = malloc_size(&pMemory);
+				DMibExpect(Size2, ==, 0);
+
+				auto *pInvalidMemory = (void* *)(mint)4096;
+
+				auto SizeInvalidMemory = malloc_size(pInvalidMemory);
+				DMibExpect(SizeInvalidMemory, ==, 0);
+			};
+#endif
 		}
 	};
 
