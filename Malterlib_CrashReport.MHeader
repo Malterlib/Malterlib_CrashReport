@@ -80,7 +80,7 @@ Property
 	!!MalterlibEnableInternalTests true
 	
 	MalterlibTests =+ "Malterlib_CrashReport"
- 	MalterlibTestFiles_Malterlib_CrashReport: [type(CEntity)] = ["Test/*"->MakeAbsolute()]
+	MalterlibTestFiles_Malterlib_CrashReport: [type(CEntity)] = ["Test/*"->MakeAbsolute()]
 	MalterlibTestExtraGroups_Malterlib_CrashReport: [string] = ["{Test}/{Malterlib_CrashReport}"]
 	
 }
