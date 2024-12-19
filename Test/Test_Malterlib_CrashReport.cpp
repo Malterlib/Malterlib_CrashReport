@@ -20,7 +20,25 @@ namespace
 
 		void f_DoTests()
 		{
-			DMibTestSuite(CTestCategory("Crash") << CTestGroup("Manual"))
+			using namespace NMib;
+#ifdef DMibNeedDebugException
+			NFunction::TCFunction<void(NContract::CContractViolation const&)> OldLogger = NContract::fg_SetContractLogger(nullptr);
+			auto Cleanup = g_OnScopeExit / [&]
+				{
+					NContract::fg_SetContractLogger(OldLogger);
+				}
+			;
+#endif
+#			if DMibEnableSafeCheck > 0
+				bool bOldAssethThrow = NContract::fg_MibSafeCheckSetThrowsException(false);
+				auto Cleanup3 = g_OnScopeExit / [&]
+					{
+						NContract::fg_MibSafeCheckSetThrowsException(bOldAssethThrow);
+					}
+				;
+#			endif
+
+			DMibTestCategoryFlags(CTestCategory("Crash") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
 			{
 				DMibTrace("Crashing\n", 0);
 #ifndef DMibClangAnalyzerWorkaround
@@ -28,12 +46,27 @@ namespace
 				*pTest = 0;
 #endif
 			};
-			DMibTestSuite(CTestCategory("Breakpoint") << CTestGroup("Manual"))
+			DMibTestCategoryFlags(CTestCategory("Breakpoint") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
 			{
 				DMibTrace("Crashing\n", 0);
 				DMibPDebugBreak;
 			};
-			DMibTestSuite(CTestCategory("Deadlock") << CTestGroup("Manual"))
+			DMibTestCategoryFlags(CTestCategory("FastCheck") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
+			{
+				DMibTrace("FastChecking\n", 0);
+				DMibFastCheck(false);
+			};
+			DMibTestCategoryFlags(CTestCategory("SafeCheck") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
+			{
+				DMibTrace("SafeChecking\n", 0);
+				DMibSafeCheck(false, "SafeCheck test");
+			};
+			DMibTestCategoryFlags(CTestCategory("Contract") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
+			{
+				DMibTrace("Violating check contract\n", 0);
+				DMibCheck(false)(5);
+			};
+			DMibTestCategoryFlags(CTestCategory("Deadlock") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
 			{
 				NMib::NSys::fg_Debug_StartDeadlockDetector(5.0f);
 				volatile bool bValue = true;
