@@ -66,6 +66,11 @@ namespace
 				DMibTrace("Violating check contract\n", 0);
 				DMibCheck(false)(5);
 			};
+			DMibTestCategoryFlags(CTestCategory("C++ Exception") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
+			{
+				DMibTrace("Throwing exception\n", 0);
+				DMibError("Test exception");
+			};
 			DMibTestCategoryFlags(CTestCategory("Deadlock") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
 			{
 				NMib::NSys::fg_Debug_StartDeadlockDetector(5.0f);
