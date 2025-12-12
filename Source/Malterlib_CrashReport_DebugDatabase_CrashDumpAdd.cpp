@@ -37,7 +37,7 @@ namespace NMib::NCrashReport
 		if (!_Params.m_Path.f_StartsWith(TempDirectory + "/"))
 			co_return DMibErrorInstance("Expected file to be stored inside debug database temp directory");
 
-		auto UncompressedPath = Internal.m_Options.m_DatabaseRoot / "TempUncompressed" / NCryptography::fg_RandomID() / _Params.m_FileName;
+		auto UncompressedPath = Internal.m_Options.m_DatabaseRoot / "TempUncompressed" / NCryptography::fg_FastRandomID() / _Params.m_FileName;
 
 		NPrivate::CFileInfo FileInfo;
 		{
