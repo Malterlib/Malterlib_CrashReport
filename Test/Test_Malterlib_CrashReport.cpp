@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "stdlib.h"
@@ -81,14 +81,14 @@ namespace
 			DMibTestSuite(CTestCategory("Free Perf") << CTestGroup("Manual"))
 			{
 				auto Checkout = NMib::fg_GetSys()->f_MemoryManager_Checkout();
-				
+
 				mint TestSize = 16;
-				
+
 				{
 					NMib::NTime::CCycles Cycles;
 					mint Size2 = TestSize;
 					void *pPointer2 = NMib::NMemory::fg_Alloc(Size2);
-					
+
 					Cycles.f_Start();
 					void *pPointer;
 					for (mint i = 0; i < 10000000; ++i)
@@ -99,7 +99,7 @@ namespace
 					Cycles.f_Stop();
 
 					NMib::NMemory::fg_Free(pPointer2, Size2);
-					
+
 					DMibConOut("{} cycles per fg_Alloc/fg_Free pair{\n}", fp64(Cycles.f_GetCycles()) / fp64(10000000.0) << pPointer << pPointer2);
 				}
 				//NMib::NSys::fg_Thread_Sleep(20.0);
@@ -114,9 +114,9 @@ namespace
 						free(pPointer);
 					}
 					free(pPointer2);
-					
+
 					Cycles.f_Stop();
-					
+
 					DMibConOut("{} cycles per malloc/free pair{\n}", fp64(Cycles.f_GetCycles()) / fp64(10000000.0) << pPointer << pPointer2);
 				}
 			};

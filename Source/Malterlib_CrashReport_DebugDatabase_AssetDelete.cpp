@@ -81,7 +81,7 @@ namespace NMib::NCrashReport
 				}
 			)
 		;
-		
+
 		co_return *pResult;
 	}
 }

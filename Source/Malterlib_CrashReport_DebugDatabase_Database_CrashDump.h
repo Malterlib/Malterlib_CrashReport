@@ -20,7 +20,7 @@ namespace NMib::NCrashReport::NDebugDatabase
 	};
 
 	struct CCrashDumpKey;
-	
+
 	struct CCrashDumpStoredFileKey
 	{
 		template <typename tf_CStream>

@@ -27,7 +27,7 @@ namespace NMib::NCrashReport::NDebugDatabase
 	};
 
 	struct CAssetKey;
-	
+
 	struct CAssetStoredFileKey
 	{
 		template <typename tf_CStream>

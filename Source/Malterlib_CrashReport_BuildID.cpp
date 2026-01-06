@@ -124,7 +124,7 @@ namespace NMib::NCrashReport
 			)
 		;
 	}
-	
+
 	NConcurrency::TCFuture<NContainer::TCMap<NStr::CStr, NStr::CStr>> fg_GetBuildIDsFromExecutable(NStr::CStr _FileName)
 	{
 		NStorage::TCSharedPointer<NFile::CFile> pFile = fg_Construct();

@@ -55,7 +55,7 @@ namespace NMib::NCrashReport::NDebugDatabase
 		uint32 Version = gc_Version;
 		_Stream % Version;
 		DMibBinaryStreamVersion(_Stream, Version);
-		
+
 		_Stream % m_Timestamp;
 		_Stream % m_Digest;
 		_Stream % m_Size;
