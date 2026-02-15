@@ -129,8 +129,8 @@ namespace NMib::NCrashReport
 			{
 				for (auto iParam = _Context.m_Parameters.f_GetIterator(); iParam; ++iParam)
 				{
-					NMib::NStr::CStr Key = fg_ForceStrUTF8(iParam.f_GetKey());
-					NMib::NStr::CStr Value = fg_ForceStrUTF8(*iParam);
+					NMib::NStr::CStr Key = iParam.f_GetKey();
+					NMib::NStr::CStr Value = *iParam;
 
 					curl_formadd
 								(
