@@ -100,7 +100,7 @@ namespace
 
 					NMib::NMemory::fg_Free(pPointer2, Size2);
 
-					DMibConOut("{} cycles per fg_Alloc/fg_Free pair{\n}", fp64(Cycles.f_GetCycles()) / fp64(10000000.0) << pPointer << pPointer2);
+					DMibConOut("{} cycles per fg_Alloc/fg_Free pair{\n}", fp64(Cycles.f_GetCycles()) / fp64(10000000.0), pPointer, pPointer2);
 				}
 				//NMib::NSys::fg_Thread_Sleep(20.0);
 				{
@@ -117,7 +117,7 @@ namespace
 
 					Cycles.f_Stop();
 
-					DMibConOut("{} cycles per malloc/free pair{\n}", fp64(Cycles.f_GetCycles()) / fp64(10000000.0) << pPointer << pPointer2);
+					DMibConOut("{} cycles per malloc/free pair{\n}", fp64(Cycles.f_GetCycles()) / fp64(10000000.0), pPointer, pPointer2);
 				}
 			};
 #ifdef DPlatformFamily_macOS
