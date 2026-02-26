@@ -31,7 +31,7 @@ namespace NMib::NCrashReport
 
 		fp64 mp_Timeout;
 
-		NAtomic::TCAtomicAggregate<aint> *mp_pPause;
+		NAtomic::TCAtomic<aint> *mp_pPause;
 
 		NThread::CMutual mp_Lock;
 

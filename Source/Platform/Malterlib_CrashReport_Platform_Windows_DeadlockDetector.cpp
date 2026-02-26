@@ -93,7 +93,7 @@ namespace NMib::NCrashReport::NPlatform
 		if (!FindAtom(str_utf16("IdsDeadLockAtom")))
 		{
 			AddAtom(str_utf16("IdsDeadLockAtom"));
-			mp_pPause = (NAtomic::TCAtomicAggregate<aint> *)HeapAlloc(GetProcessHeap(), 0, sizeof(NAtomic::TCAtomicAggregate<aint>));
+			mp_pPause = (NAtomic::TCAtomic<aint> *)HeapAlloc(GetProcessHeap(), 0, sizeof(NAtomic::TCAtomic<aint>));
 			mp_pPause->f_Store(0);
 			mint PausePointer = (mint)mp_pPause;
 			for (mint i = 0; i < sizeof(mint) * 8; ++i)
@@ -115,7 +115,7 @@ namespace NMib::NCrashReport::NPlatform
 
 				}
 			}
-			mp_pPause = (NAtomic::TCAtomicAggregate<aint> *)PausePointer;
+			mp_pPause = (NAtomic::TCAtomic<aint> *)PausePointer;
 		}
 
 		mp_CurrentDialogWindow = nullptr;

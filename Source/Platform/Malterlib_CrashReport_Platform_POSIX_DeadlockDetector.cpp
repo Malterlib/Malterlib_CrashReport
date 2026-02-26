@@ -22,7 +22,7 @@ namespace NMib::NCrashReport::NPlatform
 
 	protected:
 
-		NAtomic::TCAtomicAggregate<aint> mp_Pause;
+		NAtomic::TCAtomic<aint> mp_Pause;
 
 		inline_never bool fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message);
 	};
