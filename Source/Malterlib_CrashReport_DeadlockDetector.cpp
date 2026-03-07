@@ -8,7 +8,7 @@ namespace NMib::NCrashReport
 {
 	CDeadlockDetector::CDeadlockDetector()
 	{
-		mp_Clock.f_Start();
+		mp_Stopwatch.f_Start();
 	}
 
 	CDeadlockDetector::~CDeadlockDetector()
@@ -24,7 +24,7 @@ namespace NMib::NCrashReport
 	void CDeadlockDetector::f_Pulse()
 	{
 		DMibLock(mp_Lock);
-		mp_LastPulse = mp_Clock.f_GetTime();
+		mp_LastPulse = mp_Stopwatch.f_GetTime();
 		mp_SavedSpanCheck = 0;
 	}
 
@@ -52,7 +52,7 @@ namespace NMib::NCrashReport
 			LastPulse = mp_LastPulse;
 		}
 
-		fp64 Now = mp_Clock.f_GetTime();
+		fp64 Now = mp_Stopwatch.f_GetTime();
 		fp64 Timeout = mp_Timeout * 0.5;
 
 		fp64 SpanPulse = Now - LastPulse;
@@ -66,12 +66,12 @@ namespace NMib::NCrashReport
 
 	aint CDeadlockDetector::f_Main()
 	{
-		mp_LastCheck = mp_LastPulse = mp_Clock.f_GetTime();
+		mp_LastCheck = mp_LastPulse = mp_Stopwatch.f_GetTime();
 		mp_SavedSpanCheck = 0;
 
 		while (f_GetState() != NThread::EThreadState_EventWantQuit)
 		{
-			fp64 Now = mp_Clock.f_GetTime();
+			fp64 Now = mp_Stopwatch.f_GetTime();
 
 			fp64 LastPulse;
 			fp64 LastSpanCheck;
@@ -121,7 +121,7 @@ namespace NMib::NCrashReport
 				}
 				{
 					DMibLock(mp_Lock);
-					mp_LastPulse = mp_Clock.f_GetTime();
+					mp_LastPulse = mp_Stopwatch.f_GetTime();
 					mp_SavedSpanCheck = 0.0;
 				}
 			}

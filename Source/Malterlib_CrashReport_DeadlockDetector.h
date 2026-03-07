@@ -35,7 +35,7 @@ namespace NMib::NCrashReport
 
 		NThread::CMutual mp_Lock;
 
-		NTime::CClock mp_Clock;
+		NTime::CStopwatch mp_Stopwatch;
 
 		fp64 mp_LastPulse;
 		fp64 mp_LastCheck;

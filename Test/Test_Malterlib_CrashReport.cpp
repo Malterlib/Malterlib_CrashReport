@@ -1,6 +1,8 @@
 // Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
+#include <Mib/Time/TimeMeasure>
+
 #include "stdlib.h"
 
 #ifdef DPlatformFamily_macOS
@@ -85,7 +87,7 @@ namespace
 				mint TestSize = 16;
 
 				{
-					NMib::NTime::CCycles Cycles;
+					NMib::NTime::CCyclesTimeMeasure Cycles;
 					mint Size2 = TestSize;
 					void *pPointer2 = NMib::NMemory::fg_Alloc(Size2);
 
@@ -104,7 +106,7 @@ namespace
 				}
 				//NMib::NSys::fg_Thread_Sleep(20.0);
 				{
-					NMib::NTime::CCycles Cycles;
+					NMib::NTime::CCyclesTimeMeasure Cycles;
 					Cycles.f_Start();
 					void *pPointer2 = malloc(TestSize);
 					void *pPointer;
