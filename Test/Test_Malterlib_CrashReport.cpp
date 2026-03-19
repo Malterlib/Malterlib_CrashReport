@@ -84,16 +84,16 @@ namespace
 			{
 				auto Checkout = NMib::fg_GetSys()->f_MemoryManager_Checkout();
 
-				mint TestSize = 16;
+				umint TestSize = 16;
 
 				{
 					NMib::NTime::CCyclesTimeMeasure Cycles;
-					mint Size2 = TestSize;
+					umint Size2 = TestSize;
 					void *pPointer2 = NMib::NMemory::fg_Alloc(Size2);
 
 					Cycles.f_Start();
 					void *pPointer;
-					for (mint i = 0; i < 10000000; ++i)
+					for (umint i = 0; i < 10000000; ++i)
 					{
 						pPointer = NMib::NMemory::fg_Alloc(TestSize);
 						NMib::NMemory::fg_Free(pPointer, TestSize);
@@ -110,7 +110,7 @@ namespace
 					Cycles.f_Start();
 					void *pPointer2 = malloc(TestSize);
 					void *pPointer;
-					for (mint i = 0; i < 10000000; ++i)
+					for (umint i = 0; i < 10000000; ++i)
 					{
 						pPointer = malloc(TestSize);
 						free(pPointer);
@@ -137,7 +137,7 @@ namespace
 				auto Size2 = malloc_size(&pMemory);
 				DMibExpect(Size2, ==, 0);
 
-				auto *pInvalidMemory = (void* *)(mint)4096;
+				auto *pInvalidMemory = (void* *)(umint)4096;
 
 				auto SizeInvalidMemory = malloc_size(pInvalidMemory);
 				DMibExpect(SizeInvalidMemory, ==, 0);

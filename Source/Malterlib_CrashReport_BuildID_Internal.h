@@ -17,7 +17,7 @@ namespace NMib::NCrashReport
 	struct CExecutableFormat
 	{
 		EExecutableType m_Type = EExecutableType::mc_ExecutableLinkableFormat;
-		mint m_ArchitectureBitness = 64;
+		umint m_ArchitectureBitness = 64;
 		EEndian m_Endian = EEndian_Little;
 	};
 

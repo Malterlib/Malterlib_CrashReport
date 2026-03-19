@@ -95,10 +95,10 @@ namespace NMib::NCrashReport::NPlatform
 			AddAtom(str_utf16("IdsDeadLockAtom"));
 			mp_pPause = (NAtomic::TCAtomic<aint> *)HeapAlloc(GetProcessHeap(), 0, sizeof(NAtomic::TCAtomic<aint>));
 			mp_pPause->f_Store(0);
-			mint PausePointer = (mint)mp_pPause;
-			for (mint i = 0; i < sizeof(mint) * 8; ++i)
+			umint PausePointer = (umint)mp_pPause;
+			for (umint i = 0; i < sizeof(umint) * 8; ++i)
 			{
-				if (PausePointer & (mint(1) << i))
+				if (PausePointer & (umint(1) << i))
 				{
 					AddAtom(NStr::CFWStr128(NStr::CFWStr128::CFormat(str_utf16("IdsDeadLockAtom{}")) << i));
 				}
@@ -106,12 +106,12 @@ namespace NMib::NCrashReport::NPlatform
 		}
 		else
 		{
-			mint PausePointer = 0;
-			for (mint i = 0; i < sizeof(mint) * 8; ++i)
+			umint PausePointer = 0;
+			for (umint i = 0; i < sizeof(umint) * 8; ++i)
 			{
 				if (FindAtom(NStr::CFWStr128(NStr::CFWStr128::CFormat(str_utf16("IdsDeadLockAtom{}")) << i)))
 				{
-					PausePointer |= (mint(1) << i);
+					PausePointer |= (umint(1) << i);
 
 				}
 			}

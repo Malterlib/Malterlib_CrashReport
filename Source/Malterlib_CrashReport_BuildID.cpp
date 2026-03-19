@@ -50,7 +50,7 @@ namespace NMib::NCrashReport
 					BinaryStream.f_ConsumeBytes(ElfIdent, sizeof(ElfIdent));
 					if (ElfIdent[0] == 0x7F && ElfIdent[1] == 'E' && ElfIdent[2] == 'L' && ElfIdent[3] == 'F')
 					{
-						mint Bitness = (ElfIdent[4] == 1) ? 32 : (ElfIdent[4] == 2) ? 64 : 0;
+						umint Bitness = (ElfIdent[4] == 1) ? 32 : (ElfIdent[4] == 2) ? 64 : 0;
 						EEndian Endian = (ElfIdent[5] == 1) ? EEndian_Little : (ElfIdent[5] == 2) ? EEndian_Big : EEndian_Native;
 
 						if (Bitness != 0 && Endian != EEndian_Native)

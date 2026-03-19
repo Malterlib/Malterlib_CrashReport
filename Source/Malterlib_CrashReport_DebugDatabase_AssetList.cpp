@@ -38,7 +38,7 @@ namespace NMib::NCrashReport
 
 		NContainer::TCVector<CAsset> Batch;
 
-		constexpr mint c_BatchSize = 128;
+		constexpr umint c_BatchSize = 128;
 
 		auto CursorPrefix = NPrivate::fg_GetAssetFilterPrefix(_Filter);
 		for (auto iAsset = ReadTransaction.m_Transaction.f_ReadCursor(NDatabase::CDatabaseValue(CursorPrefix)); iAsset; ++iAsset)

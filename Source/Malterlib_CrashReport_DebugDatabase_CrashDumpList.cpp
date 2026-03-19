@@ -38,7 +38,7 @@ namespace NMib::NCrashReport
 
 		NContainer::TCVector<CCrashDump> Batch;
 
-		constexpr mint c_BatchSize = 128;
+		constexpr umint c_BatchSize = 128;
 
 		auto CursorPrefix = NPrivate::fg_GetCrashDumpFilterPrefix(_Filter);
 		for (auto iCrashDump = ReadTransaction.m_Transaction.f_ReadCursor(NDatabase::CDatabaseValue(CursorPrefix)); iCrashDump; ++iCrashDump)
