@@ -9,6 +9,9 @@ Import "../Core/Lib_Malterlib.MTarget"
 	{
 		Type "External"
 		Remotes =+ {Name: "upstream", URL: "https://github.com/google/breakpad.git"}
+		{
+			!!MalterlibAddUpstreams true
+		}
 	}
 }
 
@@ -78,9 +81,9 @@ Property
 Property
 {
 	!!MalterlibEnableInternalTests true
-	
+
 	MalterlibTests =+ "Malterlib_CrashReport"
 	MalterlibTestFiles_Malterlib_CrashReport: [type(CEntity)] = ["Test/*"->MakeAbsolute()]
 	MalterlibTestExtraGroups_Malterlib_CrashReport: [string] = ["{Test}/{Malterlib_CrashReport}"]
-	
+
 }
