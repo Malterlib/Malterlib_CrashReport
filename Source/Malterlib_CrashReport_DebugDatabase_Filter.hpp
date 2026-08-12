@@ -5,8 +5,8 @@
 
 namespace NMib::NCrashReport::NPrivate
 {
-	template <typename tf_CValue>
-	bool fg_IsExactFilter(NStorage::TCOptional<tf_CValue> const &_Value)
+	template <typename tf_CValue, NStorage::EOptionalMoveSemantics tf_MoveSemantics>
+	bool fg_IsExactFilter(NStorage::TCOptional<tf_CValue, tf_MoveSemantics> const &_Value)
 	{
 		if (!_Value)
 			return false;
