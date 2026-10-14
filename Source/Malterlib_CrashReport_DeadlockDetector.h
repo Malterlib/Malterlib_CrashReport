@@ -10,7 +10,6 @@ namespace NMib::NCrashReport
 	class CDeadlockDetector : public NThread::CThread
 	{
 	public:
-
 		CDeadlockDetector();
 		~CDeadlockDetector();
 
@@ -26,8 +25,7 @@ namespace NMib::NCrashReport
 		bool f_IsDeadlocked();
 
 	protected:
-
-		virtual bool fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message) = 0;
+		virtual bool fp_DisplayMessage(NStr::CStr const &_Title, NStr::CStr const &_Message) = 0;
 
 		fp64 mp_Timeout;
 

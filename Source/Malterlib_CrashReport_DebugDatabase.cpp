@@ -46,17 +46,7 @@ namespace NMib::NCrashReport
 
 		m_Database = fg_Construct();
 
-		co_await
-			(
-				m_Database
-				(
-					&NDatabase::CDatabaseActor::f_OpenDatabase
-					, m_Options.m_DatabaseRoot / "Database"
-					, m_Options.m_MaxDatabaseSize
-				)
-				% "Failed to open database"
-			)
-		;
+		co_await (m_Database(&NDatabase::CDatabaseActor::f_OpenDatabase, m_Options.m_DatabaseRoot / "Database", m_Options.m_MaxDatabaseSize) % "Failed to open database");
 
 		auto Stats = co_await m_Database(&NDatabase::CDatabaseActor::f_GetAggregateStatistics);
 		[[maybe_unused]] auto TotalSizeUsed = Stats.f_GetTotalUsedSize();
@@ -132,7 +122,7 @@ namespace NMib::NCrashReport
 		auto &Internal = *mp_pInternal;
 
 		if (Internal.m_Database)
-			co_await fg_Move(Internal.m_Database).f_Destroy().f_Wrap() > LogError.f_Warning("Failed to destroy database actor");;
+			co_await fg_Move(Internal.m_Database).f_Destroy().f_Wrap() > LogError.f_Warning("Failed to destroy database actor");
 
 		co_return {};
 	}

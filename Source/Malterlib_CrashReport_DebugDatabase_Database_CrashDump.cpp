@@ -17,14 +17,8 @@ namespace NMib::NCrashReport::NDebugDatabase
 		return CCrashDumpKey{.m_UniqueKey = m_UniqueKey};
 	}
 
-	NConcurrency::TCFuture<CDatabaseDeleteResult> fg_DeleteCrashDump
-		(
-			NDatabase::CDatabaseActor::CTransactionWrite _Transaction
-			, NDebugDatabase::CCrashDumpKey _Key
-			, CCrashDumpValue _CrashDump
-			, NStr::CStr _RootDir
-			, bool _bPretend
-		)
+	auto fg_DeleteCrashDump(NDatabase::CDatabaseActor::CTransactionWrite _Transaction, NDebugDatabase::CCrashDumpKey _Key, CCrashDumpValue _CrashDump, NStr::CStr _RootDir, bool _bPretend)
+		-> NConcurrency::TCFuture<CDatabaseDeleteResult>
 	{
 		// This is running in the blocking actor context
 		CDatabaseDeleteResult Result{.m_WriteTransaction = fg_Move(_Transaction)};
@@ -66,12 +60,8 @@ namespace NMib::NCrashReport::NDebugDatabase
 		co_return fg_Move(Result);
 	}
 
-	NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite> fg_DeleteCrashDump
-		(
-			NDatabase::CDatabaseActor::CTransactionWrite _Transaction
-			, CCrashDumpKey _Key
-			, NStr::CStr _RootDir
-		)
+	auto fg_DeleteCrashDump(NDatabase::CDatabaseActor::CTransactionWrite _Transaction, CCrashDumpKey _Key, NStr::CStr _RootDir)
+		-> NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite>
 	{
 		// This is running in the blocking actor context
 		auto WriteTransaction = fg_Move(_Transaction);

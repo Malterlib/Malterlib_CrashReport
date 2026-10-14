@@ -73,12 +73,8 @@ namespace NMib::NCrashReport::NDebugDatabase
 		)
 	;
 
-	NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite> fg_DeleteCrashDump
-		(
-			NDatabase::CDatabaseActor::CTransactionWrite _Transaction
-			, NDebugDatabase::CCrashDumpKey _Key
-			, NStr::CStr _RootDir
-		)
+	auto fg_DeleteCrashDump(NDatabase::CDatabaseActor::CTransactionWrite _Transaction, NDebugDatabase::CCrashDumpKey _Key, NStr::CStr _RootDir)
+		-> NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite>
 	;
 }
 

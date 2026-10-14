@@ -26,11 +26,8 @@ namespace NMib::NCrashReport
 
 		auto CaptureScope = co_await
 			(
-				NConcurrency::g_CaptureExceptions %
-				(
-					NConcurrency::fg_LogError("DebugDatabase", "Error reading data from database (f_Asset_List)")
-					% "Internal error reading from debug database, see log"
-				)
+				NConcurrency::g_CaptureExceptions
+				% (NConcurrency::fg_LogError("DebugDatabase", "Error reading data from database (f_Asset_List)") % "Internal error reading from debug database, see log")
 			)
 		;
 

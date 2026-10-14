@@ -13,7 +13,6 @@ namespace NMib::NCrashReport
 
 	CDeadlockDetector::~CDeadlockDetector()
 	{
-
 	}
 
 	NStr::CStr CDeadlockDetector::f_GetThreadName()
@@ -85,7 +84,6 @@ namespace NMib::NCrashReport
 			fp64 SpanCheck = Now - mp_LastCheck;
 			fp64 SpanPulse = Now - LastPulse;
 
-
 			if (SpanCheck > mp_Timeout * 0.5 * NTime::CSystem_Time::fs_GetTimeSpeed())
 			{
 				DMibLock(mp_Lock);
@@ -105,8 +103,13 @@ namespace NMib::NCrashReport
 					NStr::CStr ProgramName = fg_GetSys()->f_GetProgramName();
 
 					NStr::CStr Title = NStr::CStr::CFormat("{} is not responding") << ProgramName;
-					NStr::CStr Message = NStr::CStr::CFormat("{} is not responding. This might be temporary.\n\nWould you like to continue waiting for {0} to respond?\n\nTo report this problem, please press 'Create error report' to create an error report.") << ProgramName;
-
+					NStr::CStr Message = NStr::CStr::CFormat
+						(
+							"{} is not responding. This might be temporary.\n\nWould you like to continue waiting for {0} to respond?\n\nTo report this problem, please press 'Create error "
+							"report' to create an error report."
+						)
+						<< ProgramName
+					;
 
 #if defined(DMibDebug) && 0
 					DMibDTrace("Deadlock detector would have activated" DMibNewLine, 0);
@@ -114,9 +117,7 @@ namespace NMib::NCrashReport
 					bool bDaemon = fg_GetSys()->f_GetRunningAsDaemon();
 
 					if (bDaemon || !fp_DisplayMessage(Title, Message))
-					{
 						DMibPDebugBreak;
-					}
 #endif
 				}
 				{
