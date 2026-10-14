@@ -9,7 +9,6 @@ namespace NMib::NCrashReport::NPlatform
 	class CPosixDeadlockDetector : public CDeadlockDetector
 	{
 	public:
-
 		CPosixDeadlockDetector()
 		{
 			mp_pPause = &mp_Pause;
@@ -21,10 +20,9 @@ namespace NMib::NCrashReport::NPlatform
 		}
 
 	protected:
-
 		NAtomic::TCAtomic<aint> mp_Pause;
 
-		inline_never bool fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message);
+		inline_never bool fp_DisplayMessage(NStr::CStr const &_Title, NStr::CStr const &_Message);
 	};
 
 	struct CSubSystem_CrashReport_Platform_MacOS_DeadlockDetector : public CSubSystem
@@ -78,7 +76,7 @@ namespace NMib::NCrashReport::NPlatform
 		g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector = {DAggregateInit}
 	;
 
-	inline_never bool CPosixDeadlockDetector::fp_DisplayMessage(NStr::CStr const& _Title, NStr::CStr const& _Message)
+	inline_never bool CPosixDeadlockDetector::fp_DisplayMessage(NStr::CStr const &_Title, NStr::CStr const &_Message)
 	{
 		auto &SubSystem = *g_SubSystem_CrashReport_Platform_MacOS_DeadlockDetector;
 		if (SubSystem.m_pDeadlockNotifyFunction)

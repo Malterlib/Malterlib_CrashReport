@@ -12,7 +12,7 @@ namespace NMib::NCrashReport
 	{
 		enum class EAssetType : uint32
 		{
-			mc_Executable = 0
+			mc_Executable  = 0
 			, mc_DebugInfo = 1
 		};
 
@@ -144,5 +144,5 @@ namespace NMib::NCrashReport
 }
 
 #ifndef DMibPNoShortCuts
-	using namespace NMib::NCrashReport;
+using namespace NMib::NCrashReport;
 #endif

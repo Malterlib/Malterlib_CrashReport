@@ -51,7 +51,6 @@ Import "../../External/breakpad/Breakpad.MTarget"
 	}
 }
 
-
 Property
 {
 	MalterlibLibrary_CrashReport: bool = MalterlibLibrary_All
@@ -85,5 +84,4 @@ Property
 	MalterlibTests =+ "Malterlib_CrashReport"
 	MalterlibTestFiles_Malterlib_CrashReport: [type(CEntity)] = ["Test/*"->MakeAbsolute()]
 	MalterlibTestExtraGroups_Malterlib_CrashReport: [string] = ["{Test}/{Malterlib_CrashReport}"]
-
 }
