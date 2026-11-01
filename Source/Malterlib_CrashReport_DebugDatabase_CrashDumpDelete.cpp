@@ -23,16 +23,8 @@ namespace NMib::NCrashReport
 		co_await Internal.m_Database
 			(
 				&NDatabase::CDatabaseActor::f_WriteWithCompaction
-				, NConcurrency::g_ActorFunctorWeak /
-				[
-					RootDir = Internal.m_Options.m_DatabaseRoot
-					, Filter = _Filter
-					, pResult
-					, nMaxToDelete = _nMaxToDelete
-					, bPretend = _bPretend
-				]
-				(NDatabase::CDatabaseActor::CTransactionWrite _Transaction, bool _bCompacting) mutable
-				-> NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite>
+				, NConcurrency::g_ActorFunctorWeak / [RootDir = Internal.m_Options.m_DatabaseRoot, Filter = _Filter, pResult, nMaxToDelete = _nMaxToDelete, bPretend = _bPretend]
+				(NDatabase::CDatabaseActor::CTransactionWrite _Transaction, bool _bCompacting) mutable -> NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite>
 				{
 					co_await NConcurrency::ECoroutineFlag_CaptureMalterlibExceptions;
 

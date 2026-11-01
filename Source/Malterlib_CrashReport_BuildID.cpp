@@ -95,7 +95,7 @@ namespace NMib::NCrashReport
 							case NPortableExecutable::EImageMachine::mc_M32R:
 							case NPortableExecutable::EImageMachine::mc_POWERPC:
 							case NPortableExecutable::EImageMachine::mc_POWERPCFP:
- 								co_return CExecutableFormat{.m_Type = EExecutableType::mc_PortableExecutable, .m_ArchitectureBitness = 32, .m_Endian = EEndian_Little};
+								co_return CExecutableFormat{.m_Type = EExecutableType::mc_PortableExecutable, .m_ArchitectureBitness = 32, .m_Endian = EEndian_Little};
 
 							case NPortableExecutable::EImageMachine::mc_AMD64:
 							case NPortableExecutable::EImageMachine::mc_IA64:
@@ -155,12 +155,9 @@ namespace NMib::NCrashReport
 
 		switch (ExecutableFormat.m_Type)
 		{
-		case EExecutableType::mc_ExecutableLinkableFormat:
-			co_return co_await fg_GetBuildIDsFromExecutable_Elf(pFile, ExecutableFormat);
-		case EExecutableType::mc_MachObject:
-			co_return co_await fg_GetBuildIDsFromExecutable_MachO(pFile, ExecutableFormat, {});
-		case EExecutableType::mc_PortableExecutable:
-			co_return co_await fg_GetBuildIDsFromExecutable_PortableExecutable(pFile, ExecutableFormat);
+		case EExecutableType::mc_ExecutableLinkableFormat: co_return co_await fg_GetBuildIDsFromExecutable_Elf(pFile, ExecutableFormat);
+		case EExecutableType::mc_MachObject: co_return co_await fg_GetBuildIDsFromExecutable_MachO(pFile, ExecutableFormat, {});
+		case EExecutableType::mc_PortableExecutable: co_return co_await fg_GetBuildIDsFromExecutable_PortableExecutable(pFile, ExecutableFormat);
 		}
 
 		co_return DMibErrorInstance("Internal error: Invalid executable type");

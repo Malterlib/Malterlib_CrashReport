@@ -63,7 +63,7 @@ namespace NMib::NCrashReport::NDebugDatabase
 		NStorage::TCOptional<NStr::CStr> m_ExceptionInfo;
 	};
 
-	NConcurrency::TCFuture<CDatabaseDeleteResult> fg_DeleteCrashDump
+	auto fg_DeleteCrashDump
 		(
 			NDatabase::CDatabaseActor::CTransactionWrite _Transaction
 			, NDebugDatabase::CCrashDumpKey _Key
@@ -71,14 +71,11 @@ namespace NMib::NCrashReport::NDebugDatabase
 			, NStr::CStr _RootDir
 			, bool _bPretend
 		)
+		-> NConcurrency::TCFuture<CDatabaseDeleteResult>
 	;
 
-	NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite> fg_DeleteCrashDump
-		(
-			NDatabase::CDatabaseActor::CTransactionWrite _Transaction
-			, NDebugDatabase::CCrashDumpKey _Key
-			, NStr::CStr _RootDir
-		)
+	auto fg_DeleteCrashDump(NDatabase::CDatabaseActor::CTransactionWrite _Transaction, NDebugDatabase::CCrashDumpKey _Key, NStr::CStr _RootDir)
+		-> NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite>
 	;
 }
 

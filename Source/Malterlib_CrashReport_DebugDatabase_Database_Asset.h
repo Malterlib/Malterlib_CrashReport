@@ -71,22 +71,12 @@ namespace NMib::NCrashReport::NDebugDatabase
 		NStr::CStr m_MainAssetFile;
 	};
 
-	NConcurrency::TCFuture<CDatabaseDeleteResult> fg_DeleteAsset
-		(
-			NDatabase::CDatabaseActor::CTransactionWrite _Transaction
-			, NDebugDatabase::CAssetKey _Key
-			, NDebugDatabase::CAssetValue _Asset
-			, NStr::CStr _RootDir
-			, bool _bPretend
-		)
+	auto fg_DeleteAsset(NDatabase::CDatabaseActor::CTransactionWrite _Transaction, NDebugDatabase::CAssetKey _Key, NDebugDatabase::CAssetValue _Asset, NStr::CStr _RootDir, bool _bPretend)
+		-> NConcurrency::TCFuture<CDatabaseDeleteResult>
 	;
 
-	NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite> fg_DeleteAsset
-		(
-			NDatabase::CDatabaseActor::CTransactionWrite _Transaction
-			, NDebugDatabase::CAssetKey _Key
-			, NStr::CStr _RootDir
-		)
+	auto fg_DeleteAsset(NDatabase::CDatabaseActor::CTransactionWrite _Transaction, NDebugDatabase::CAssetKey _Key, NStr::CStr _RootDir)
+		-> NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite>
 	;
 }
 

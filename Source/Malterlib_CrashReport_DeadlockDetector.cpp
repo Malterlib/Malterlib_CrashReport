@@ -13,7 +13,6 @@ namespace NMib::NCrashReport
 
 	CDeadlockDetector::~CDeadlockDetector()
 	{
-
 	}
 
 	NStr::CStr CDeadlockDetector::f_GetThreadName()
@@ -85,7 +84,6 @@ namespace NMib::NCrashReport
 			fp64 SpanCheck = Now - mp_LastCheck;
 			fp64 SpanPulse = Now - LastPulse;
 
-
 			if (SpanCheck > mp_Timeout * 0.5 * NTime::CSystem_Time::fs_GetTimeSpeed())
 			{
 				DMibLock(mp_Lock);
@@ -119,9 +117,7 @@ namespace NMib::NCrashReport
 					bool bDaemon = fg_GetSys()->f_GetRunningAsDaemon();
 
 					if (bDaemon || !fp_DisplayMessage(Title, Message))
-					{
 						DMibPDebugBreak;
-					}
 #endif
 				}
 				{

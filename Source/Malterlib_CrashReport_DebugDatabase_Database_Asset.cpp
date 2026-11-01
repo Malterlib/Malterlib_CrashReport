@@ -17,14 +17,8 @@ namespace NMib::NCrashReport::NDebugDatabase
 		return CAssetKey{.m_UniqueKey = m_UniqueKey};
 	}
 
-	NConcurrency::TCFuture<CDatabaseDeleteResult> fg_DeleteAsset
-		(
-			NDatabase::CDatabaseActor::CTransactionWrite _Transaction
-			, NDebugDatabase::CAssetKey _Key
-			, CAssetValue _Asset
-			, NStr::CStr _RootDir
-			, bool _bPretend
-		)
+	auto fg_DeleteAsset(NDatabase::CDatabaseActor::CTransactionWrite _Transaction, NDebugDatabase::CAssetKey _Key, CAssetValue _Asset, NStr::CStr _RootDir, bool _bPretend)
+		-> NConcurrency::TCFuture<CDatabaseDeleteResult>
 	{
 		// This is running in the blocking actor context
 		CDatabaseDeleteResult Result{.m_WriteTransaction = fg_Move(_Transaction)};
@@ -66,12 +60,7 @@ namespace NMib::NCrashReport::NDebugDatabase
 		co_return fg_Move(Result);
 	}
 
-	NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite> fg_DeleteAsset
-		(
-			NDatabase::CDatabaseActor::CTransactionWrite _Transaction
-			, CAssetKey _Key
-			, NStr::CStr _RootDir
-		)
+	NConcurrency::TCFuture<NDatabase::CDatabaseActor::CTransactionWrite> fg_DeleteAsset(NDatabase::CDatabaseActor::CTransactionWrite _Transaction, CAssetKey _Key, NStr::CStr _RootDir)
 	{
 		// This is running in the blocking actor context
 		auto WriteTransaction = fg_Move(_Transaction);

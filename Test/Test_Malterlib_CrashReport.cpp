@@ -6,8 +6,8 @@
 #include "stdlib.h"
 
 #ifdef DPlatformFamily_macOS
-	#include <memory>
-	#include <malloc/malloc.h>
+#	include <memory>
+#	include <malloc/malloc.h>
 #endif
 
 namespace
@@ -15,7 +15,6 @@ namespace
 	class CCrashDumping_Tests : public CTest
 	{
 	public:
-
 		CCrashDumping_Tests()
 		{
 		}
@@ -24,21 +23,21 @@ namespace
 		{
 			using namespace NMib;
 #ifdef DMibNeedDebugException
-			NFunction::TCFunction<void(NContract::CContractViolation const&)> OldLogger = NContract::fg_SetContractLogger(nullptr);
+			NFunction::TCFunction<void (NContract::CContractViolation const &)> OldLogger = NContract::fg_SetContractLogger(nullptr);
 			auto Cleanup = g_OnScopeExit / [&]
 				{
 					NContract::fg_SetContractLogger(OldLogger);
 				}
 			;
 #endif
-#			if DMibEnableSafeCheck > 0
-				bool bOldAssethThrow = NContract::fg_MibSafeCheckSetThrowsException(false);
-				auto Cleanup3 = g_OnScopeExit / [&]
-					{
-						NContract::fg_MibSafeCheckSetThrowsException(bOldAssethThrow);
-					}
-				;
-#			endif
+#if DMibEnableSafeCheck > 0
+			bool bOldAssethThrow = NContract::fg_MibSafeCheckSetThrowsException(false);
+			auto Cleanup3 = g_OnScopeExit / [&]
+				{
+					NContract::fg_MibSafeCheckSetThrowsException(bOldAssethThrow);
+				}
+			;
+#endif
 
 			DMibTestCategoryFlags(CTestCategory("Crash") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
 			{
@@ -76,7 +75,7 @@ namespace
 			DMibTestCategoryFlags(CTestCategory("Deadlock") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
 			{
 				NMib::NSys::fg_Debug_StartDeadlockDetector(5.0f);
-				volatile bool bValue = true;
+				bool volatile bValue = true;
 				while (bValue)
 					bValue = true;
 			};
@@ -137,7 +136,7 @@ namespace
 				auto Size2 = malloc_size(&pMemory);
 				DMibExpect(Size2, ==, 0);
 
-				auto *pInvalidMemory = (void* *)(umint)4096;
+				auto *pInvalidMemory = (void **)(umint)4096;
 
 				auto SizeInvalidMemory = malloc_size(pInvalidMemory);
 				DMibExpect(SizeInvalidMemory, ==, 0);

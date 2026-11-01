@@ -13,5 +13,5 @@ namespace NMib::NCrashReport
 }
 
 #ifndef DMibPNoShortCuts
-	using namespace NMib::NCrashReport;
+using namespace NMib::NCrashReport;
 #endif

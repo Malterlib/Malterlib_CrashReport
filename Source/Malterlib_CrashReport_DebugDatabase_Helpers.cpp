@@ -33,12 +33,7 @@ namespace NMib::NCrashReport::NPrivate
 			{
 				NFile::CFile::fs_CreateDirectory(NFile::CFile::fs_GetPath(_UncompressTo));
 				pOutFile = fg_Construct();
-				pOutFile->f_Open
-					(
-						_UncompressTo
-						, NFile::EFileOpen_Write | NFile::EFileOpen_ShareAll | NFile::EFileOpen_NoLocalCache
-					)
-				;
+				pOutFile->f_Open(_UncompressTo, NFile::EFileOpen_Write | NFile::EFileOpen_ShareAll | NFile::EFileOpen_NoLocalCache);
 			}
 
 			uint64 FilePosition = 0;
@@ -52,13 +47,7 @@ namespace NMib::NCrashReport::NPrivate
 				if (bWriteOutput)
 				{
 					(
-						NConcurrency::g_Dispatch(*BlockingActors) /
-						[
-							pOutFile
-							, FilePosition
-							, Data = fg_Move(Data)
-						]
-						() mutable
+						NConcurrency::g_Dispatch(*BlockingActors) / [pOutFile, FilePosition, Data = fg_Move(Data)]() mutable
 						{
 							pOutFile->f_WriteNoLocalCache(FilePosition, Data.f_GetArray(), Data.f_GetLen());
 						}

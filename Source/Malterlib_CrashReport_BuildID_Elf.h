@@ -14,19 +14,19 @@ namespace NMib::NCrashReport
 	{
 		enum class ESegmentType : uint32
 		{
-			mc_NULL = 0
-			, mc_LOAD = 1
-			, mc_DYNAMIC = 2
-			, mc_INTERP = 3
-			, mc_NOTE = 4
-			, mc_SHLIB = 5
-			, mc_PHDR = 6
-			, mc_LOSUNW = 0x6ffffffa
-			, mc_SUNWBSS = 0x6ffffffb
+			mc_NULL        = 0
+			, mc_LOAD      = 1
+			, mc_DYNAMIC   = 2
+			, mc_INTERP    = 3
+			, mc_NOTE      = 4
+			, mc_SHLIB     = 5
+			, mc_PHDR      = 6
+			, mc_LOSUNW    = 0x6ffffffa
+			, mc_SUNWBSS   = 0x6ffffffb
 			, mc_SUNWSTACK = 0x6ffffffa
-			, mc_HISUNW = 0x6fffffff
-			, mc_LOPROC = 0x70000000
-			, mc_HIPROC = 0x7fffffff
+			, mc_HISUNW    = 0x6fffffff
+			, mc_LOPROC    = 0x70000000
+			, mc_HIPROC    = 0x7fffffff
 		};
 	}
 
