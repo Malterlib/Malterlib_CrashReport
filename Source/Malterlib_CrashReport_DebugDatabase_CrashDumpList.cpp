@@ -14,9 +14,12 @@ namespace NMib::NCrashReport
 	{
 		auto &Internal = *mp_pInternal;
 
-		auto OnResume = co_await f_CheckDestroyedOnResume();
-
-		auto ReadTransactionWapped = co_await Internal.m_Database(&NDatabase::CDatabaseActor::f_OpenTransactionRead).f_Wrap();
+		// The guard ends before the switch to the blocking actor, where checking whether the actor is destroyed would race with it
+		NConcurrency::TCAsyncResult<NDatabase::CDatabaseActor::CTransactionRead> ReadTransactionWapped;
+		{
+			auto CheckDestroy = co_await f_CheckDestroyedOnResume();
+			ReadTransactionWapped = co_await Internal.m_Database(&NDatabase::CDatabaseActor::f_OpenTransactionRead).f_Wrap();
+		}
 
 		auto CrashDumpPath = Internal.m_Options.m_DatabaseRoot / "CrashDumps";
 
