@@ -14,9 +14,8 @@ namespace NMib::NCrashReport
 		NMib::NStr::CStr m_CrashServer;
 	};
 
-	class CUploader
+	struct CUploader
 	{
-	public:
 		CUploader();
 		~CUploader();
 
@@ -24,7 +23,7 @@ namespace NMib::NCrashReport
 		bool f_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &_oErrors);
 
 	protected:
-		class CDetails;
+		struct CDetails;
 		NMib::NStorage::TCUniquePointer<CDetails> mp_pD;
 	};
 

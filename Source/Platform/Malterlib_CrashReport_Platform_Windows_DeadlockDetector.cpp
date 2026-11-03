@@ -8,9 +8,8 @@
 
 namespace NMib::NCrashReport::NPlatform
 {
-	class CWindowsDeadlockDetector : public CDeadlockDetector
+	struct CWindowsDeadlockDetector : public CDeadlockDetector
 	{
-	public:
 		CWindowsDeadlockDetector();
 		~CWindowsDeadlockDetector();
 

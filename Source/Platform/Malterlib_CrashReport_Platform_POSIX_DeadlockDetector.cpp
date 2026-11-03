@@ -6,9 +6,8 @@
 
 namespace NMib::NCrashReport::NPlatform
 {
-	class CPosixDeadlockDetector : public CDeadlockDetector
+	struct CPosixDeadlockDetector : public CDeadlockDetector
 	{
-	public:
 		CPosixDeadlockDetector()
 		{
 			mp_pPause = &mp_Pause;

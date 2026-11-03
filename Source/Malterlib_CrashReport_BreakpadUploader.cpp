@@ -13,7 +13,7 @@ namespace NMib::NCrashReport
 		return _Size * _nMemb; // We just tell Curl we have handled the bytes (we don't care about the response from the error-reporter server)
 	}
 
-	class CUploader::CDetails
+	struct CUploader::CDetails
 	{
 	protected:
 		NMib::NFile::CLockFile mp_UploadLockFile;

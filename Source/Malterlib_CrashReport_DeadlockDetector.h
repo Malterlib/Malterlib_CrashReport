@@ -7,9 +7,8 @@
 
 namespace NMib::NCrashReport
 {
-	class CDeadlockDetector : public NThread::CThread
+	struct CDeadlockDetector : public NThread::CThread
 	{
-	public:
 		CDeadlockDetector();
 		~CDeadlockDetector();
 

@@ -12,9 +12,8 @@
 
 namespace
 {
-	class CCrashDumping_Tests : public CTest
+	struct CCrashDumping_Tests : public CTest
 	{
-	public:
 		CCrashDumping_Tests()
 		{
 		}
