@@ -21,12 +21,12 @@ namespace NMib::NCrashReport::NPlatform
 		LRESULT fp_DisplayMyMessage(HINSTANCE hinst, HWND hwndOwner, LPCSTR lpszMessage, LPCSTR lpszTitle);
 		inline_never bool fp_DisplayMessage(NStr::CStr const &_Title, NStr::CStr const &_Message);
 
-		enum
+		enum EDialogID
 		{
-			ID_HELP   = 150
-			, ID_TEXT = 200
-			, IDB_Yes
-			, IDB_No
+			EDialogID_Help   = 150
+			, EDialogID_Text = 200
+			, EDialogID_Yes
+			, EDialogID_No
 		};
 
 		HWND mp_CurrentDialogWindow;
@@ -191,16 +191,16 @@ namespace NMib::NCrashReport::NPlatform
 				int MonHeight = MonInfo.rcWork.bottom - MonInfo.rcWork.top;
 
 				SendMessage(hwndDlg, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
-				HWND hTmp = GetDlgItem(hwndDlg, IDB_Yes);
+				HWND hTmp = GetDlgItem(hwndDlg, EDialogID_Yes);
 				SendMessage(hTmp, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
-				hTmp = GetDlgItem(hwndDlg, IDB_No);
+				hTmp = GetDlgItem(hwndDlg, EDialogID_No);
 				SendMessage(hTmp, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
-				hTmp = GetDlgItem(hwndDlg, ID_TEXT);
+				hTmp = GetDlgItem(hwndDlg, EDialogID_Text);
 				SendMessage(hTmp, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
 
-				// SendDlgItemMessage(hwndDlg, IDB_Yes, BM_SETSTYLE, BS_PUSHBUTTON, (LONG)TRUE);
-				// SendDlgItemMessage(hwndDlg, IDB_No, BM_SETSTYLE, BS_DEFPUSHBUTTON, (LONG)TRUE);
-				SendMessage(hwndDlg, DM_SETDEFID, IDB_Yes, 0L);
+				// SendDlgItemMessage(hwndDlg, EDialogID_Yes, BM_SETSTYLE, BS_PUSHBUTTON, (LONG)TRUE);
+				// SendDlgItemMessage(hwndDlg, EDialogID_No, BM_SETSTYLE, BS_DEFPUSHBUTTON, (LONG)TRUE);
+				SendMessage(hwndDlg, DM_SETDEFID, EDialogID_Yes, 0L);
 
 				SetWindowPos(hwndDlg, nullptr, MonInfo.rcWork.left + MonWidth / 2 - Width / 2, MonInfo.rcWork.top + MonHeight / 2 - Height / 2, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 
@@ -217,12 +217,12 @@ namespace NMib::NCrashReport::NPlatform
 				// HWND Window = (HWND)lParam;
 				if (Message == BN_CLICKED)
 				{
-					if (Control == IDB_Yes)
+					if (Control == EDialogID_Yes)
 					{
 						EndDialog(hwndDlg, 1);
 						return 1;
 					}
-					else if (Control == IDB_No)
+					else if (Control == EDialogID_No)
 					{
 						EndDialog(hwndDlg, 335);
 						return 1;
@@ -279,7 +279,7 @@ namespace NMib::NCrashReport::NPlatform
 		lpdit->y = 55;
 		lpdit->cx = ButtonWidth;
 		lpdit->cy = 12;
-		lpdit->id = IDB_Yes; // OK button identifier
+		lpdit->id = EDialogID_Yes; // OK button identifier
 		lpdit->style = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON;
 
 		lpw = (LPWORD)(lpdit + 1);
@@ -300,7 +300,7 @@ namespace NMib::NCrashReport::NPlatform
 		lpdit->y = 55;
 		lpdit->cx = ButtonWidth;
 		lpdit->cy = 12;
-		lpdit->id = IDB_No; // OK button identifier
+		lpdit->id = EDialogID_No; // OK button identifier
 		lpdit->style = WS_CHILD | WS_VISIBLE;
 
 		lpw = (LPWORD)(lpdit + 1);
@@ -321,7 +321,7 @@ namespace NMib::NCrashReport::NPlatform
 		lpdit->y = 7;
 		lpdit->cx = 180;
 		lpdit->cy = 45;
-		lpdit->id = ID_TEXT; // text identifier
+		lpdit->id = EDialogID_Text; // text identifier
 		lpdit->style = WS_CHILD | WS_VISIBLE | SS_LEFT;
 
 		lpw = (LPWORD)(lpdit + 1);

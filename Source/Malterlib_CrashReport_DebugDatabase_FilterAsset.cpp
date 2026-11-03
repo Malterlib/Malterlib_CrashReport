@@ -14,7 +14,7 @@ namespace NMib::NCrashReport::NPrivate
 		NDatabase::CDatabaseValueCache PrefixCache;
 
 		{
-			NStream::CBinaryStreamMemoryRef<NStream::CBinaryStreamBigEndian, NDatabase::CDatabaseValueCache> Stream{PrefixCache, 0};
+			NStream::TCBinaryStreamMemoryRef<NStream::CBinaryStreamBigEndian, NDatabase::CDatabaseValueCache> Stream{PrefixCache, 0};
 
 			NDatabase::CDatabaseValue::fs_FeedLexicographic(Stream, NDebugDatabase::CAssetKey::mc_Prefix);
 

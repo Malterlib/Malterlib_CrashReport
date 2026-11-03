@@ -76,7 +76,7 @@ namespace NMib::NCrashReport
 
 					NContainer::TCVector<uint32> DirectoryIndices;
 					{
-						NStream::CBinaryStreamMemoryRef<> MemoryStream(DirectoryIndexData);
+						NStream::TCBinaryStreamMemoryRef<> MemoryStream(DirectoryIndexData);
 
 						for (uint32 iBlock = 0; iBlock < nDirectoryBlocks; ++iBlock)
 						{
@@ -103,7 +103,7 @@ namespace NMib::NCrashReport
 						}
 					}
 
-					NStream::CBinaryStreamMemoryRef<> DirectoryMemory(DirectoryData);
+					NStream::TCBinaryStreamMemoryRef<> DirectoryMemory(DirectoryData);
 
 					uint32 NumStreams = 0;
 					DirectoryMemory >> NumStreams;
@@ -145,7 +145,7 @@ namespace NMib::NCrashReport
 						}
 					}
 
-					NStream::CBinaryStreamMemoryRef<> StreamMemory(Stream1Data);
+					NStream::TCBinaryStreamMemoryRef<> StreamMemory(Stream1Data);
 
 					if (Stream1Data.f_GetLen() < 24)
 						co_return DMibErrorInstance("PDB stream 1 isn't long enough to extract build id");

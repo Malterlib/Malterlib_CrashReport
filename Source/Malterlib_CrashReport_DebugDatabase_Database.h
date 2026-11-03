@@ -8,7 +8,7 @@
 
 namespace NMib::NCrashReport::NDebugDatabase
 {
-	enum
+	enum EDebugDatabaseVersion
 	{
 		EDebugDatabaseVersion_Current = 0x101
 	};
