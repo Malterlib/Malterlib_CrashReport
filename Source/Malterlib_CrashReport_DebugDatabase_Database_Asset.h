@@ -37,7 +37,7 @@ namespace NMib::NCrashReport::NDebugDatabase
 
 		CAssetKey f_AssetKey() const;
 
-		static NStr::CStr const mc_Prefix;
+		static NStr::CStr const mc_Prefix; // NOLINT(malterlib-variable-naming): defined constexpr in the .cpp, which the check doesn't see from here
 
 		NStr::CStr m_Prefix = mc_Prefix;
 		NCryptography::CHashDigest_SHA256 m_Digest;
@@ -51,7 +51,7 @@ namespace NMib::NCrashReport::NDebugDatabase
 		template <typename tf_CStream>
 		void f_ConsumeLexicographic(tf_CStream &_Stream);
 
-		static NStr::CStr const mc_Prefix;
+		static NStr::CStr const mc_Prefix; // NOLINT(malterlib-variable-naming): defined constexpr in the .cpp, which the check doesn't see from here
 
 		NStr::CStr m_Prefix = mc_Prefix;
 		CAssetUniqueKey m_UniqueKey;

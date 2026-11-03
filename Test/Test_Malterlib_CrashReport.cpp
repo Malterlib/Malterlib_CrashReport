@@ -91,7 +91,7 @@ namespace
 
 					Cycles.f_Start();
 					void *pPointer;
-					for (umint i = 0; i < 10000000; ++i)
+					for (umint iIteration = 0; iIteration < 10000000; ++iIteration)
 					{
 						pPointer = NMib::NMemory::fg_Alloc(TestSize);
 						NMib::NMemory::fg_Free(pPointer, TestSize);
@@ -108,7 +108,7 @@ namespace
 					Cycles.f_Start();
 					void *pPointer2 = malloc(TestSize);
 					void *pPointer;
-					for (umint i = 0; i < 10000000; ++i)
+					for (umint iIteration = 0; iIteration < 10000000; ++iIteration)
 					{
 						pPointer = malloc(TestSize);
 						free(pPointer);

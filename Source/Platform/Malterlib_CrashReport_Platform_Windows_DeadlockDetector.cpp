@@ -93,19 +93,19 @@ namespace NMib::NCrashReport::NPlatform
 			mp_pPause = (NAtomic::TCAtomic<aint> *)HeapAlloc(GetProcessHeap(), 0, sizeof(NAtomic::TCAtomic<aint>));
 			mp_pPause->f_Store(0);
 			umint PausePointer = (umint)mp_pPause;
-			for (umint i = 0; i < sizeof(umint) * 8; ++i)
+			for (umint iBit = 0; iBit < sizeof(umint) * 8; ++iBit)
 			{
-				if (PausePointer & (umint(1) << i))
-					AddAtom(NStr::CFWStr128(NStr::CFWStr128::CFormat(str_utf16("IdsDeadLockAtom{}")) << i));
+				if (PausePointer & (umint(1) << iBit))
+					AddAtom(NStr::CFWStr128(NStr::CFWStr128::CFormat(str_utf16("IdsDeadLockAtom{}")) << iBit));
 			}
 		}
 		else
 		{
 			umint PausePointer = 0;
-			for (umint i = 0; i < sizeof(umint) * 8; ++i)
+			for (umint iBit = 0; iBit < sizeof(umint) * 8; ++iBit)
 			{
-				if (FindAtom(NStr::CFWStr128(NStr::CFWStr128::CFormat(str_utf16("IdsDeadLockAtom{}")) << i)))
-					PausePointer |= (umint(1) << i);
+				if (FindAtom(NStr::CFWStr128(NStr::CFWStr128::CFormat(str_utf16("IdsDeadLockAtom{}")) << iBit)))
+					PausePointer |= (umint(1) << iBit);
 			}
 			mp_pPause = (NAtomic::TCAtomic<aint> *)PausePointer;
 		}
@@ -119,34 +119,34 @@ namespace NMib::NCrashReport::NPlatform
 
 	HFONT CWindowsDeadlockDetector::fp_CreatePointFontIndirect(LOGFONT const *_pLogFont)
 	{
-		HDC hDC;
-		hDC = ::GetDC(nullptr);
+		HDC DeviceContext;
+		DeviceContext = ::GetDC(nullptr);
 
 		// convert nPointSize to logical units based on pDC
-		LOGFONT logFont = *_pLogFont;
-		POINT pt;
-		pt.y = ::GetDeviceCaps(hDC, LOGPIXELSY) * logFont.lfHeight;
-		pt.y /= 720; // 72 points/inch, 10 decipoints/point
-		pt.x = 0;
-		::DPtoLP(hDC, &pt, 1);
-		POINT ptOrg = {0, 0};
-		::DPtoLP(hDC, &ptOrg, 1);
-		logFont.lfHeight = -fg_Abs(pt.y - ptOrg.y);
+		LOGFONT LogFont = *_pLogFont;
+		POINT Point;
+		Point.y = ::GetDeviceCaps(DeviceContext, LOGPIXELSY) * LogFont.lfHeight;
+		Point.y /= 720; // 72 points/inch, 10 decipoints/point
+		Point.x = 0;
+		::DPtoLP(DeviceContext, &Point, 1);
+		POINT Origin = {0, 0};
+		::DPtoLP(DeviceContext, &Origin, 1);
+		LogFont.lfHeight = -fg_Abs(Point.y - Origin.y);
 
-		ReleaseDC(nullptr, hDC);
+		ReleaseDC(nullptr, DeviceContext);
 
-		return CreateFontIndirect(&logFont);
+		return CreateFontIndirect(&LogFont);
 	}
 
 	HFONT CWindowsDeadlockDetector::fp_CreatePointFont(int _PointSize, LPCTSTR _pFaceName)
 	{
-		LOGFONT logFont;
-		memset(&logFont, 0, sizeof(LOGFONT));
-		logFont.lfCharSet = DEFAULT_CHARSET;
-		logFont.lfHeight = _PointSize;
-		NStr::fg_StrCopy(logFont.lfFaceName, _pFaceName, sizeof(logFont.lfFaceName) / sizeof(logFont.lfFaceName[0]));
+		LOGFONT LogFont;
+		memset(&LogFont, 0, sizeof(LOGFONT));
+		LogFont.lfCharSet = DEFAULT_CHARSET;
+		LogFont.lfHeight = _PointSize;
+		NStr::fg_StrCopy(LogFont.lfFaceName, _pFaceName, sizeof(LogFont.lfFaceName) / sizeof(LogFont.lfFaceName[0]));
 
-		return fp_CreatePointFontIndirect(&logFont);
+		return fp_CreatePointFontIndirect(&LogFont);
 	}
 
 	INT_PTR CALLBACK CWindowsDeadlockDetector::fsp_HandleMessages(HWND _Dialog, UINT _Message, WPARAM _WParam, LPARAM _LParam)
@@ -176,11 +176,11 @@ namespace NMib::NCrashReport::NPlatform
 			{
 				POINT Pnt;
 				GetCursorPos(&Pnt);
-				HMONITOR hMon = MonitorFromPoint(Pnt, MONITOR_DEFAULTTONEAREST);
+				HMONITOR Monitor = MonitorFromPoint(Pnt, MONITOR_DEFAULTTONEAREST);
 				MONITORINFO MonInfo;
 				NMemory::fg_MemClear(MonInfo);
 				MonInfo.cbSize = sizeof(MonInfo);
-				GetMonitorInfo(hMon, &MonInfo);
+				GetMonitorInfo(Monitor, &MonInfo);
 
 				RECT Rect;
 				GetWindowRect(_Dialog, &Rect);
@@ -191,12 +191,12 @@ namespace NMib::NCrashReport::NPlatform
 				int MonHeight = MonInfo.rcWork.bottom - MonInfo.rcWork.top;
 
 				SendMessage(_Dialog, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
-				HWND hTmp = GetDlgItem(_Dialog, EDialogID_Yes);
-				SendMessage(hTmp, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
-				hTmp = GetDlgItem(_Dialog, EDialogID_No);
-				SendMessage(hTmp, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
-				hTmp = GetDlgItem(_Dialog, EDialogID_Text);
-				SendMessage(hTmp, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
+				HWND DialogItem = GetDlgItem(_Dialog, EDialogID_Yes);
+				SendMessage(DialogItem, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
+				DialogItem = GetDlgItem(_Dialog, EDialogID_No);
+				SendMessage(DialogItem, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
+				DialogItem = GetDlgItem(_Dialog, EDialogID_Text);
+				SendMessage(DialogItem, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
 
 				// SendDlgItemMessage(_Dialog, EDialogID_Yes, BM_SETSTYLE, BS_PUSHBUTTON, (LONG)TRUE);
 				// SendDlgItemMessage(_Dialog, EDialogID_No, BM_SETSTYLE, BS_DEFPUSHBUTTON, (LONG)TRUE);
@@ -236,111 +236,111 @@ namespace NMib::NCrashReport::NPlatform
 
 	LRESULT CWindowsDeadlockDetector::fp_DisplayMyMessage(HINSTANCE _Instance, HWND _Owner, LPCSTR _pMessage, LPCSTR _pTitle)
 	{
-		HGLOBAL hgbl;
-		LPDLGTEMPLATE lpdt;
-		LPDLGITEMTEMPLATE lpdit;
-		LPWORD lpw;
-		LPWSTR lpwsz;
-		LRESULT ret;
-		int nchar;
+		HGLOBAL GlobalMemory;
+		LPDLGTEMPLATE pDialogTemplate;
+		LPDLGITEMTEMPLATE pItemTemplate;
+		LPWORD pWord;
+		LPWSTR pString;
+		LRESULT Result;
+		int nChars;
 
-		hgbl = GlobalAlloc(GMEM_ZEROINIT, 2048);
-		if (!hgbl)
+		GlobalMemory = GlobalAlloc(GMEM_ZEROINIT, 2048);
+		if (!GlobalMemory)
 			return -1;
 
-		lpdt = (LPDLGTEMPLATE)GlobalLock(hgbl);
+		pDialogTemplate = (LPDLGTEMPLATE)GlobalLock(GlobalMemory);
 
 		// Define a dialog box.
 
-		lpdt->style = WS_POPUP | WS_BORDER | WS_SYSMENU | DS_MODALFRAME | WS_CAPTION;
-		lpdt->cdit = 3; // number of controls
-		lpdt->x = 10;
-		lpdt->y = 10;
-		lpdt->cx = 200;
-		lpdt->cy = 75;
+		pDialogTemplate->style = WS_POPUP | WS_BORDER | WS_SYSMENU | DS_MODALFRAME | WS_CAPTION;
+		pDialogTemplate->cdit = 3; // number of controls
+		pDialogTemplate->x = 10;
+		pDialogTemplate->y = 10;
+		pDialogTemplate->cx = 200;
+		pDialogTemplate->cy = 75;
 
-		lpw = (LPWORD)(lpdt + 1);
-		*lpw++ = 0; // no menu
-		*lpw++ = 0; // predefined dialog box class (by default)
+		pWord = (LPWORD)(pDialogTemplate + 1);
+		*pWord++ = 0; // no menu
+		*pWord++ = 0; // predefined dialog box class (by default)
 
-		lpwsz = (LPWSTR) lpw;
-		nchar = MultiByteToWideChar(CP_ACP, 0, _pTitle, -1, lpwsz, 50);
-		lpw += nchar;
+		pString = (LPWSTR) pWord;
+		nChars = MultiByteToWideChar(CP_ACP, 0, _pTitle, -1, pString, 50);
+		pWord += nChars;
 
 		int32 ButtonWidth = 60;
 		int32 ButtonGap = 5;
-		int32 ButtonStart = (lpdt->cx - (ButtonWidth * 2 + ButtonGap)) / 2;
+		int32 ButtonStart = (pDialogTemplate->cx - (ButtonWidth * 2 + ButtonGap)) / 2;
 		//-----------------------
 		// Define an Yes button.
 		//-----------------------
-		lpw = fg_AlignUp(lpw, 4); // align DLGITEMTEMPLATE on DWORD boundary
-		lpdit = (LPDLGITEMTEMPLATE) lpw;
-		lpdit->x = ButtonStart;
-		lpdit->y = 55;
-		lpdit->cx = ButtonWidth;
-		lpdit->cy = 12;
-		lpdit->id = EDialogID_Yes; // OK button identifier
-		lpdit->style = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON;
+		pWord = fg_AlignUp(pWord, 4); // align DLGITEMTEMPLATE on DWORD boundary
+		pItemTemplate = (LPDLGITEMTEMPLATE) pWord;
+		pItemTemplate->x = ButtonStart;
+		pItemTemplate->y = 55;
+		pItemTemplate->cx = ButtonWidth;
+		pItemTemplate->cy = 12;
+		pItemTemplate->id = EDialogID_Yes; // OK button identifier
+		pItemTemplate->style = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON;
 
-		lpw = (LPWORD)(lpdit + 1);
-		*lpw++ = 0xFFFF;
-		*lpw++ = 0x0080; // button class
+		pWord = (LPWORD)(pItemTemplate + 1);
+		*pWord++ = 0xFFFF;
+		*pWord++ = 0x0080; // button class
 
-		lpwsz = (LPWSTR) lpw;
-		nchar = MultiByteToWideChar(CP_ACP, 0, "Continue waiting", -1, lpwsz, 50);
-		lpw += nchar;
-		*lpw++ = 0x0000; // Creation Data
+		pString = (LPWSTR) pWord;
+		nChars = MultiByteToWideChar(CP_ACP, 0, "Continue waiting", -1, pString, 50);
+		pWord += nChars;
+		*pWord++ = 0x0000; // Creation Data
 
 		//-----------------------
 		// Define an No button.
 		//-----------------------
-		lpw = fg_AlignUp(lpw, 4); // align DLGITEMTEMPLATE on DWORD boundary
-		lpdit = (LPDLGITEMTEMPLATE) lpw;
-		lpdit->x = ButtonStart + ButtonWidth + ButtonGap;
-		lpdit->y = 55;
-		lpdit->cx = ButtonWidth;
-		lpdit->cy = 12;
-		lpdit->id = EDialogID_No; // OK button identifier
-		lpdit->style = WS_CHILD | WS_VISIBLE;
+		pWord = fg_AlignUp(pWord, 4); // align DLGITEMTEMPLATE on DWORD boundary
+		pItemTemplate = (LPDLGITEMTEMPLATE) pWord;
+		pItemTemplate->x = ButtonStart + ButtonWidth + ButtonGap;
+		pItemTemplate->y = 55;
+		pItemTemplate->cx = ButtonWidth;
+		pItemTemplate->cy = 12;
+		pItemTemplate->id = EDialogID_No; // OK button identifier
+		pItemTemplate->style = WS_CHILD | WS_VISIBLE;
 
-		lpw = (LPWORD)(lpdit + 1);
-		*lpw++ = 0xFFFF;
-		*lpw++ = 0x0080; // button class
+		pWord = (LPWORD)(pItemTemplate + 1);
+		*pWord++ = 0xFFFF;
+		*pWord++ = 0x0080; // button class
 
-		lpwsz = (LPWSTR) lpw;
-		nchar = MultiByteToWideChar(CP_ACP, 0, "Create error report", -1, lpwsz, 50);
-		lpw += nchar;
-		*lpw++ = 0x0000; // Creation Data
+		pString = (LPWSTR) pWord;
+		nChars = MultiByteToWideChar(CP_ACP, 0, "Create error report", -1, pString, 50);
+		pWord += nChars;
+		*pWord++ = 0x0000; // Creation Data
 
 		//-----------------------
 		// Define a static text control.
 		//-----------------------
-		lpw = fg_AlignUp(lpw, 4); // align DLGITEMTEMPLATE on DWORD boundary
-		lpdit = (LPDLGITEMTEMPLATE) lpw;
-		lpdit->x = 7;
-		lpdit->y = 7;
-		lpdit->cx = 180;
-		lpdit->cy = 45;
-		lpdit->id = EDialogID_Text; // text identifier
-		lpdit->style = WS_CHILD | WS_VISIBLE | SS_LEFT;
+		pWord = fg_AlignUp(pWord, 4); // align DLGITEMTEMPLATE on DWORD boundary
+		pItemTemplate = (LPDLGITEMTEMPLATE) pWord;
+		pItemTemplate->x = 7;
+		pItemTemplate->y = 7;
+		pItemTemplate->cx = 180;
+		pItemTemplate->cy = 45;
+		pItemTemplate->id = EDialogID_Text; // text identifier
+		pItemTemplate->style = WS_CHILD | WS_VISIBLE | SS_LEFT;
 
-		lpw = (LPWORD)(lpdit + 1);
-		*lpw++ = 0xFFFF;
-		*lpw++ = 0x0082; // static class
+		pWord = (LPWORD)(pItemTemplate + 1);
+		*pWord++ = 0xFFFF;
+		*pWord++ = 0x0082; // static class
 
-		lpw = (LPWORD)NStr::fg_StrCopy((ch16 *)lpw, _pMessage);
-		*lpw++ = 0x0000; // Creation Data
+		pWord = (LPWORD)NStr::fg_StrCopy((ch16 *)pWord, _pMessage);
+		*pWord++ = 0x0000; // Creation Data
 
-		GlobalUnlock(hgbl);
+		GlobalUnlock(GlobalMemory);
 
 		mp_NormalFont = fp_CreatePointFont(80, str_utf16("MS Sans Serif"));
-		ret = DialogBoxIndirect(_Instance, (LPDLGTEMPLATE) hgbl, _Owner, (DLGPROC) fsp_HandleMessages);
+		Result = DialogBoxIndirect(_Instance, (LPDLGTEMPLATE) GlobalMemory, _Owner, (DLGPROC) fsp_HandleMessages);
 		mp_CurrentDialogWindow = nullptr;
 		DeleteObject(mp_NormalFont);
 
-		GlobalFree(hgbl);
+		GlobalFree(GlobalMemory);
 
-		return ret;
+		return Result;
 	}
 
 	inline_never bool CWindowsDeadlockDetector::fp_DisplayMessage(NStr::CStr const &_Title, NStr::CStr const &_Message)
