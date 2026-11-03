@@ -19,17 +19,17 @@ namespace NMib::NCrashReport
 		CUploader();
 		~CUploader();
 
-		bool f_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, CUploadContext const &_Context, NMib::NStr::CStr &_oErrors);
-		bool f_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &_oErrors);
+		bool f_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, CUploadContext const &_Context, NMib::NStr::CStr &o_Errors);
+		bool f_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &o_Errors);
 
 	protected:
 		struct CDetails;
-		NMib::NStorage::TCUniquePointer<CDetails> mp_pD;
+		NMib::NStorage::TCUniquePointer<CDetails> mp_pDetails;
 	};
 
-	bool fg_SendCrashReports(NMib::NStr::CStr const &_Email, NMib::NStr::CStr &_oErrors);
-	bool fg_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, NMib::NStr::CStr const &_CrashServer, NMib::NStr::CStr const &_Email, NMib::NStr::CStr &_oErrors);
-	bool fg_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &_oErrors);
+	bool fg_SendCrashReports(NMib::NStr::CStr const &_Email, NMib::NStr::CStr &o_Errors);
+	bool fg_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, NMib::NStr::CStr const &_CrashServer, NMib::NStr::CStr const &_Email, NMib::NStr::CStr &o_Errors);
+	bool fg_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &o_Errors);
 	bool fg_CheckForCrashDumps();
 }
 

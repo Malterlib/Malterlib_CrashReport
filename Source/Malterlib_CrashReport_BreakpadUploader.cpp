@@ -15,10 +15,6 @@ namespace NMib::NCrashReport
 
 	struct CUploader::CDetails
 	{
-	protected:
-		NMib::NFile::CLockFile mp_UploadLockFile;
-
-	public:
 		CDetails()
 		{
 			curl_global_init(CURL_GLOBAL_ALL);
@@ -29,7 +25,7 @@ namespace NMib::NCrashReport
 			curl_global_cleanup();
 		}
 
-		bool f_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, CUploadContext const &_Context, NMib::NStr::CStr &_oErrors)
+		bool f_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, CUploadContext const &_Context, NMib::NStr::CStr &o_Errors)
 		{
 			NMib::NStr::CStr DumpDirectory = _DumpDirectory;
 			if (!DumpDirectory.f_GetLen() || DumpDirectory[DumpDirectory.f_GetLen() - 1] != '/')
@@ -41,13 +37,13 @@ namespace NMib::NCrashReport
 			switch (LockResult)
 			{
 			case NFile::CLockFile::ELockResult_NoAccess:
-				_oErrors += "You do not have the required permissions for the dump directory\r\n";
+				o_Errors += "You do not have the required permissions for the dump directory\r\n";
 				return false;
 			case NFile::CLockFile::ELockResult_DoesNotExist:
-				_oErrors += NMib::NStr::CStr::CFormat("Dump directory ({}) does not exist\r\n") << DumpDirectory;
+				o_Errors += NMib::NStr::CStr::CFormat("Dump directory ({}) does not exist\r\n") << DumpDirectory;
 				return false;
 			case NFile::CLockFile::ELockResult_TimedOut:
-				_oErrors += "Unable to upload dumps. Either another process is already uploading the dumps or you have insufficient permissions.\r\n";
+				o_Errors += "Unable to upload dumps. Either another process is already uploading the dumps or you have insufficient permissions.\r\n";
 				return false;
 			case NFile::CLockFile::ELockResult_Locked: break;
 			default: DNeverGetHere;
@@ -64,42 +60,42 @@ namespace NMib::NCrashReport
 
 			CUploadContext PerDumpContext = _Context;
 
-			NMib::NContainer::TCVector<CStr> lDumpFiles = NMib::NFile::CFile::fs_FindFiles(DumpDirectory + "*", EFileAttrib_File, true);
-			for (auto iFile = lDumpFiles.f_GetIterator(); iFile; ++iFile)
+			NMib::NContainer::TCVector<CStr> DumpFiles = NMib::NFile::CFile::fs_FindFiles(DumpDirectory + "*", EFileAttrib_File, true);
+			for (auto iFile = DumpFiles.f_GetIterator(); iFile; ++iFile)
 			{
 				PerDumpContext.m_PathToDumpFile = *iFile;
 				if (NMib::NFile::CFile::fs_GetExtension(PerDumpContext.m_PathToDumpFile) == "dmp")
-					f_SendCrashReport(PerDumpContext, _oErrors);
+					f_SendCrashReport(PerDumpContext, o_Errors);
 			}
 
-			if (_oErrors.f_IsEmpty())
+			if (o_Errors.f_IsEmpty())
 				return true;
 
 			return false;
 		}
 
-		bool f_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &_oErrors)
+		bool f_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &o_Errors)
 		{
 			if (!NMib::NFile::CFile::fs_FileExists(_Context.m_PathToDumpFile, NMib::NFile::EFileAttrib_File))
 			{
-				_oErrors += NMib::NStr::CStr::CFormat("No dump file with the name {} exists.\r\n") << _Context.m_PathToDumpFile;
+				o_Errors += NMib::NStr::CStr::CFormat("No dump file with the name {} exists.\r\n") << _Context.m_PathToDumpFile;
 				return false;
 			}
 
 			if (_Context.m_PathToDumpFile.f_FindNoCase("FullDump") >= 0)
 			{
-				_oErrors += NMib::NStr::CStr::CFormat("Sending full dumps is not supported. Please contact support for details on how to send {} manually.\r\n") << _Context.m_PathToDumpFile;
+				o_Errors += NMib::NStr::CStr::CFormat("Sending full dumps is not supported. Please contact support for details on how to send {} manually.\r\n") << _Context.m_PathToDumpFile;
 				return false;
 			}
 
 			try
 			{
-				static int const nMaxBytes = 1024 * 1024 * 4; // Max 4MB
+				static constexpr int c_nMaxBytes = 1024 * 1024 * 4; // Max 4MB
 
 				aint nBytes = NMib::NFile::CFile::fs_GetFileSize(_Context.m_PathToDumpFile);
-				if (nBytes > nMaxBytes)
+				if (nBytes > c_nMaxBytes)
 				{
-					_oErrors
+					o_Errors
 						+= NMib::NStr::CStr::CFormat("The dump ({}) size exceeds the maximum allowed. Please contact support for details on how to send this dump manually.\r\n")
 						<< _Context.m_PathToDumpFile
 					;
@@ -108,14 +104,14 @@ namespace NMib::NCrashReport
 			}
 			catch (NMib::NFile::CExceptionFile const &_Exception)
 			{
-				_oErrors += NMib::NStr::CStr::CFormat("An error occured whilst verifying dump size: {}\r\n") << _Exception.f_GetErrorStr();
+				o_Errors += NMib::NStr::CStr::CFormat("An error occured whilst verifying dump size: {}\r\n") << _Exception.f_GetErrorStr();
 				return false;
 			}
 
 			CURL *pCurl = curl_easy_init();
 			if (!pCurl)
 			{
-				_oErrors += "libcurl was not initialised\r\n";
+				o_Errors += "libcurl was not initialised\r\n";
 				return false;
 			}
 
@@ -157,9 +153,9 @@ namespace NMib::NCrashReport
 
 			if (!bSuccess)
 			{
-				_oErrors += NMib::NStr::CStr::CFormat("Error occured while sending dump ({}): {}\n") << _Context.m_PathToDumpFile << curl_easy_strerror(Result);
+				o_Errors += NMib::NStr::CStr::CFormat("Error occured while sending dump ({}): {}\n") << _Context.m_PathToDumpFile << curl_easy_strerror(Result);
 				if (ErrorBuffer[0])
-					_oErrors += NMib::NStr::CStr::CFormat("Error message: {}\n") << ErrorBuffer;
+					o_Errors += NMib::NStr::CStr::CFormat("Error message: {}\n") << ErrorBuffer;
 			}
 			else
 			{
@@ -169,7 +165,7 @@ namespace NMib::NCrashReport
 				}
 				catch (NMib::NFile::CExceptionFile const &_Exception)
 				{
-					_oErrors
+					o_Errors
 						+= NMib::NStr::CStr::CFormat("An error occured whilst attempting to delete dump file ({}) after sending. The error reported was: {}\r\n")
 						<< _Context.m_PathToDumpFile
 						<< _Exception.f_GetErrorStr()
@@ -183,10 +179,13 @@ namespace NMib::NCrashReport
 
 			return bSuccess;
 		}
+
+	protected:
+		NMib::NFile::CLockFile mp_UploadLockFile;
 	};
 
 	CUploader::CUploader()
-		: mp_pD(fg_Construct())
+		: mp_pDetails(fg_Construct())
 	{
 	}
 
@@ -194,24 +193,24 @@ namespace NMib::NCrashReport
 	{
 	}
 
-	bool CUploader::f_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, CUploadContext const &_Context, NMib::NStr::CStr &_oErrors)
+	bool CUploader::f_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, CUploadContext const &_Context, NMib::NStr::CStr &o_Errors)
 	{
-		return mp_pD->f_SendCrashReports(_DumpDirectory, _Context, _oErrors);
+		return mp_pDetails->f_SendCrashReports(_DumpDirectory, _Context, o_Errors);
 	}
 
-	bool CUploader::f_SendCrashReport(CUploadContext const &_Context, NStr::CStr &_oErrors)
+	bool CUploader::f_SendCrashReport(CUploadContext const &_Context, NStr::CStr &o_Errors)
 	{
-		return mp_pD->f_SendCrashReport(_Context, _oErrors);
+		return mp_pDetails->f_SendCrashReport(_Context, o_Errors);
 	}
 
-	bool fg_SendCrashReports(NMib::NStr::CStr const &_Email, NMib::NStr::CStr &_oErrors)
+	bool fg_SendCrashReports(NMib::NStr::CStr const &_Email, NMib::NStr::CStr &o_Errors)
 	{
 		auto fUploadDumps = [&](NMib::NStr::CStr const &_DumpDir)
 			{
 				if (!NMib::NFile::CFile::fs_FileExists(_DumpDir, NMib::NFile::EFileAttrib_Directory))
 					return;
 
-				fg_SendCrashReports(_DumpDir, DMibBreakpadUploadServer, _Email, _oErrors);
+				fg_SendCrashReports(_DumpDir, DMibBreakpadUploadServer, _Email, o_Errors);
 			}
 		;
 
@@ -224,31 +223,31 @@ namespace NMib::NCrashReport
 			fUploadDumps(NMib::NFile::CFile::fs_AppendPath(NMib::NFile::CFile::fs_GetProgramRoot(), "CrashDumps"));
 		fUploadDumps(NMib::NFile::CFile::fs_AppendPath(NMib::NFile::CFile::fs_GetUserLocalProgramDirectory(), "CrashDumps"));
 
-		return _oErrors.f_IsEmpty();
+		return o_Errors.f_IsEmpty();
 	}
 
-	bool fg_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, NMib::NStr::CStr const &_CrashServer, NMib::NStr::CStr const &_Email, NMib::NStr::CStr &_oErrors)
+	bool fg_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, NMib::NStr::CStr const &_CrashServer, NMib::NStr::CStr const &_Email, NMib::NStr::CStr &o_Errors)
 	{
 		CUploadContext Context;
 		Context.m_Parameters["email"] = _Email;
 		Context.m_CrashServer = _CrashServer;
 
 		CUploader Uploader;
-		return Uploader.f_SendCrashReports(_DumpDirectory, Context, _oErrors);
+		return Uploader.f_SendCrashReports(_DumpDirectory, Context, o_Errors);
 	}
 
-	bool fg_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &_oErrors)
+	bool fg_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &o_Errors)
 	{
 		CUploader Uploader;
-		return Uploader.f_SendCrashReport(_Context, _oErrors);
+		return Uploader.f_SendCrashReport(_Context, o_Errors);
 	}
 
 	bool fg_CheckForCrashDumps()
 	{
-		auto fl_DirectoryHasDumps = [](NMib::NStr::CStr const &_DumpDir) -> bool
+		auto fDirectoryHasDumps = [](NMib::NStr::CStr const &_DumpDir) -> bool
 			{
-				NMib::NContainer::TCVector<CStr> lDumpFiles = NMib::NFile::CFile::fs_FindFiles(_DumpDir + "/*", EFileAttrib_File, true);
-				for (auto iFile = lDumpFiles.f_GetIterator(); iFile; ++iFile)
+				NMib::NContainer::TCVector<CStr> DumpFiles = NMib::NFile::CFile::fs_FindFiles(_DumpDir + "/*", EFileAttrib_File, true);
+				for (auto iFile = DumpFiles.f_GetIterator(); iFile; ++iFile)
 				{
 					if (NMib::NFile::CFile::fs_GetExtension(*iFile) == "dmp")
 						return true;
@@ -261,23 +260,23 @@ namespace NMib::NCrashReport
 		NMib::NStr::CStr MalterlibCrashDumpDir = fg_GetSys()->f_GetEnvironmentVariable("MalterlibCrashDumpDir");
 		if (!MalterlibCrashDumpDir.f_IsEmpty())
 		{
-			if (fl_DirectoryHasDumps(MalterlibCrashDumpDir))
+			if (fDirectoryHasDumps(MalterlibCrashDumpDir))
 				return true;
 		}
 
-		if (fl_DirectoryHasDumps(NMib::NFile::CFile::fs_AppendPath(NMib::NFile::CFile::fs_GetProgramRoot(), "CrashDumps")))
+		if (fDirectoryHasDumps(NMib::NFile::CFile::fs_AppendPath(NMib::NFile::CFile::fs_GetProgramRoot(), "CrashDumps")))
 			return true;
 
 		if
 		(
 			NMib::NFile::CFile::fs_GetProgramRoot() != NMib::NFile::CFile::fs_GetProgramDirectory()
-			&& fl_DirectoryHasDumps(NMib::NFile::CFile::fs_AppendPath(NMib::NFile::CFile::fs_GetProgramDirectory(), "CrashDumps"))
+			&& fDirectoryHasDumps(NMib::NFile::CFile::fs_AppendPath(NMib::NFile::CFile::fs_GetProgramDirectory(), "CrashDumps"))
 		)
 		{
 			return true;
 		}
 
-		if (fl_DirectoryHasDumps(NMib::NFile::CFile::fs_AppendPath(NMib::NFile::CFile::fs_GetUserLocalProgramDirectory(), "CrashDumps")))
+		if (fDirectoryHasDumps(NMib::NFile::CFile::fs_AppendPath(NMib::NFile::CFile::fs_GetUserLocalProgramDirectory(), "CrashDumps")))
 			return true;
 
 		return false;
