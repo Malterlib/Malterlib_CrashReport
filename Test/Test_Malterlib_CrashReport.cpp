@@ -22,7 +22,7 @@ namespace
 		{
 			using namespace NMib;
 #ifdef DMibNeedDebugException
-			NFunction::TCFunction<void (NContract::CContractViolation const &)> OldLogger = NContract::fg_SetContractLogger(nullptr);
+			NFunction::TCFunction<void (NContract::CContractViolation const &_ContractViolation)> OldLogger = NContract::fg_SetContractLogger(nullptr);
 			auto Cleanup = g_OnScopeExit / [&]
 				{
 					NContract::fg_SetContractLogger(OldLogger);
