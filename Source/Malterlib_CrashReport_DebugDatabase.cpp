@@ -40,6 +40,12 @@ namespace NMib::NCrashReport
 		;
 	}
 
+	CDebugDatabase::CInternal::CInternal(CDebugDatabase *_pThis, COptions const &_Options)
+		: m_pThis(_pThis)
+		, m_Options(_Options)
+	{
+	}
+
 	NConcurrency::TCFuture<void> CDebugDatabase::CInternal::f_SetupDatabase()
 	{
 		auto OnResume = co_await m_pThis->f_CheckDestroyedOnResume();

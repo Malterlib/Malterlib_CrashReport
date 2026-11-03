@@ -11,11 +11,7 @@ namespace NMib::NCrashReport
 {
 	struct CDebugDatabase::CInternal : public NConcurrency::CActorInternal
 	{
-		CInternal(CDebugDatabase *_pThis, COptions const &_Options)
-			: m_pThis(_pThis)
-			, m_Options(_Options)
-		{
-		}
+		CInternal(CDebugDatabase *_pThis, COptions const &_Options);
 
 		NConcurrency::TCFuture<void> f_SetupDatabase();
 		NConcurrency::TCFuture<void> f_CleanupTemp();
