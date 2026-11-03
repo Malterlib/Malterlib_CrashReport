@@ -94,16 +94,16 @@ namespace NMib::NCrashReport
 
 					for (auto &BuildID : BuildIDs)
 					{
-						auto ReadCursor = WriteTransaction.m_Transaction.f_ReadCursor(NDebugDatabase::CAssetKey::mc_Prefix, BuildID, Params.m_FileName);
-						if (!ReadCursor)
+						auto iReadCursor = WriteTransaction.m_Transaction.f_ReadCursor(NDebugDatabase::CAssetKey::mc_Prefix, BuildID, Params.m_FileName);
+						if (!iReadCursor)
 							continue;
 
-						auto Asset = ReadCursor.f_Value<NDebugDatabase::CAssetValue>();
+						auto Asset = iReadCursor.f_Value<NDebugDatabase::CAssetValue>();
 						if (FileInfo.m_Digest != Asset.m_Digest)
 						{
 							if (Params.m_bForceOverwrite)
 							{
-								auto KeyToRemove = ReadCursor.f_Key<NDebugDatabase::CAssetKey>();
+								auto KeyToRemove = iReadCursor.f_Key<NDebugDatabase::CAssetKey>();
 								WriteTransaction = co_await NDebugDatabase::fg_DeleteAsset(fg_Move(WriteTransaction), KeyToRemove, RootDir);
 							}
 							else

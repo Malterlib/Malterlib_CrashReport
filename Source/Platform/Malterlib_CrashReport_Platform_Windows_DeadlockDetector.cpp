@@ -17,8 +17,8 @@ namespace NMib::NCrashReport::NPlatform
 		HFONT fp_CreatePointFontIndirect(LOGFONT const *_pLogFont);
 		HFONT fp_CreatePointFont(int _PointSize, LPCTSTR _pFaceName);
 
-		static INT_PTR CALLBACK fsp_HandleMessages(HWND _Dialog, UINT _Message, WPARAM _WParam, LPARAM _LParam);
-		LRESULT fp_DisplayMyMessage(HINSTANCE _Instance, HWND _Owner, LPCSTR _pMessage, LPCSTR _pTitle);
+		static INT_PTR CALLBACK fsp_HandleMessages(HWND _pDialog, UINT _Message, WPARAM _WParam, LPARAM _LParam);
+		LRESULT fp_DisplayMyMessage(HINSTANCE _pInstance, HWND _pOwner, LPCSTR _pMessage, LPCSTR _pTitle);
 		inline_never bool fp_DisplayMessage(NStr::CStr const &_Title, NStr::CStr const &_Message);
 
 		enum EDialogID
@@ -29,18 +29,18 @@ namespace NMib::NCrashReport::NPlatform
 			, EDialogID_No
 		};
 
-		HWND mp_CurrentDialogWindow;
-		HFONT mp_NormalFont;
+		HWND mp_pCurrentDialogWindow;
+		HFONT mp_pNormalFont;
 	};
 
 	struct CSubSystem_CrashReport_Platform_Windows_DeadlockDetector : public CSubSystem
 	{
 		CWindowsDeadlockDetector m_DeadlockDetector;
-		NSys::FDeadlockUserNotify *m_pDeadlockNotifyFunction = nullptr;
+		NSys::FDeadlockUserNotify *m_fDeadlockNotifyFunction = nullptr;
 
-		void f_Debug_SetDeadlockUserNotifyFunction(NSys::FDeadlockUserNotify *_pDeadlockNotifyFunction)
+		void f_Debug_SetDeadlockUserNotifyFunction(NSys::FDeadlockUserNotify *_fDeadlockNotifyFunction)
 		{
-			m_pDeadlockNotifyFunction = _pDeadlockNotifyFunction;
+			m_fDeadlockNotifyFunction = _fDeadlockNotifyFunction;
 		}
 
 		void f_Debug_StartDeadlockDetector(fp64 _Timeout)
@@ -110,7 +110,7 @@ namespace NMib::NCrashReport::NPlatform
 			mp_pPause = (NAtomic::TCAtomic<aint> *)PausePointer;
 		}
 
-		mp_CurrentDialogWindow = nullptr;
+		mp_pCurrentDialogWindow = nullptr;
 	}
 
 	CWindowsDeadlockDetector::~CWindowsDeadlockDetector()
@@ -119,21 +119,21 @@ namespace NMib::NCrashReport::NPlatform
 
 	HFONT CWindowsDeadlockDetector::fp_CreatePointFontIndirect(LOGFONT const *_pLogFont)
 	{
-		HDC DeviceContext;
-		DeviceContext = ::GetDC(nullptr);
+		HDC pDeviceContext;
+		pDeviceContext = ::GetDC(nullptr);
 
 		// convert nPointSize to logical units based on pDC
 		LOGFONT LogFont = *_pLogFont;
 		POINT Point;
-		Point.y = ::GetDeviceCaps(DeviceContext, LOGPIXELSY) * LogFont.lfHeight;
+		Point.y = ::GetDeviceCaps(pDeviceContext, LOGPIXELSY) * LogFont.lfHeight;
 		Point.y /= 720; // 72 points/inch, 10 decipoints/point
 		Point.x = 0;
-		::DPtoLP(DeviceContext, &Point, 1);
+		::DPtoLP(pDeviceContext, &Point, 1);
 		POINT Origin = {0, 0};
-		::DPtoLP(DeviceContext, &Origin, 1);
+		::DPtoLP(pDeviceContext, &Origin, 1);
 		LogFont.lfHeight = -fg_Abs(Point.y - Origin.y);
 
-		ReleaseDC(nullptr, DeviceContext);
+		ReleaseDC(nullptr, pDeviceContext);
 
 		return CreateFontIndirect(&LogFont);
 	}
@@ -149,7 +149,7 @@ namespace NMib::NCrashReport::NPlatform
 		return fp_CreatePointFontIndirect(&LogFont);
 	}
 
-	INT_PTR CALLBACK CWindowsDeadlockDetector::fsp_HandleMessages(HWND _Dialog, UINT _Message, WPARAM _WParam, LPARAM _LParam)
+	INT_PTR CALLBACK CWindowsDeadlockDetector::fsp_HandleMessages(HWND _pDialog, UINT _Message, WPARAM _WParam, LPARAM _LParam)
 	{
 		auto &SubSystem = *g_SubSystem_CrashReport_Platform_Windows_DeadlockDetector;
 		switch (_Message)
@@ -159,7 +159,7 @@ namespace NMib::NCrashReport::NPlatform
 				switch (_WParam)
 				{
 				case SC_CLOSE:
-					EndDialog(_Dialog, 1);
+					EndDialog(_pDialog, 1);
 					return 1;
 				};
 			}
@@ -168,7 +168,7 @@ namespace NMib::NCrashReport::NPlatform
 			{
 				bool bDeadlocked = SubSystem.m_DeadlockDetector.f_IsDeadlocked();
 				if (!bDeadlocked)
-					EndDialog(_Dialog, 1);
+					EndDialog(_pDialog, 1);
 				return 1;
 			}
 			break;
@@ -176,37 +176,37 @@ namespace NMib::NCrashReport::NPlatform
 			{
 				POINT Pnt;
 				GetCursorPos(&Pnt);
-				HMONITOR Monitor = MonitorFromPoint(Pnt, MONITOR_DEFAULTTONEAREST);
+				HMONITOR pMonitor = MonitorFromPoint(Pnt, MONITOR_DEFAULTTONEAREST);
 				MONITORINFO MonInfo;
 				NMemory::fg_MemClear(MonInfo);
 				MonInfo.cbSize = sizeof(MonInfo);
-				GetMonitorInfo(Monitor, &MonInfo);
+				GetMonitorInfo(pMonitor, &MonInfo);
 
 				RECT Rect;
-				GetWindowRect(_Dialog, &Rect);
+				GetWindowRect(_pDialog, &Rect);
 
 				int Width = Rect.right - Rect.left;
 				int Height = Rect.bottom - Rect.top;
 				int MonWidth = MonInfo.rcWork.right - MonInfo.rcWork.left;
 				int MonHeight = MonInfo.rcWork.bottom - MonInfo.rcWork.top;
 
-				SendMessage(_Dialog, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
-				HWND DialogItem = GetDlgItem(_Dialog, EDialogID_Yes);
-				SendMessage(DialogItem, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
-				DialogItem = GetDlgItem(_Dialog, EDialogID_No);
-				SendMessage(DialogItem, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
-				DialogItem = GetDlgItem(_Dialog, EDialogID_Text);
-				SendMessage(DialogItem, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_NormalFont, 0);
+				SendMessage(_pDialog, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_pNormalFont, 0);
+				HWND pDialogItem = GetDlgItem(_pDialog, EDialogID_Yes);
+				SendMessage(pDialogItem, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_pNormalFont, 0);
+				pDialogItem = GetDlgItem(_pDialog, EDialogID_No);
+				SendMessage(pDialogItem, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_pNormalFont, 0);
+				pDialogItem = GetDlgItem(_pDialog, EDialogID_Text);
+				SendMessage(pDialogItem, WM_SETFONT, (WPARAM)SubSystem.m_DeadlockDetector.mp_pNormalFont, 0);
 
-				// SendDlgItemMessage(_Dialog, EDialogID_Yes, BM_SETSTYLE, BS_PUSHBUTTON, (LONG)TRUE);
-				// SendDlgItemMessage(_Dialog, EDialogID_No, BM_SETSTYLE, BS_DEFPUSHBUTTON, (LONG)TRUE);
-				SendMessage(_Dialog, DM_SETDEFID, EDialogID_Yes, 0L);
+				// SendDlgItemMessage(_pDialog, EDialogID_Yes, BM_SETSTYLE, BS_PUSHBUTTON, (LONG)TRUE);
+				// SendDlgItemMessage(_pDialog, EDialogID_No, BM_SETSTYLE, BS_DEFPUSHBUTTON, (LONG)TRUE);
+				SendMessage(_pDialog, DM_SETDEFID, EDialogID_Yes, 0L);
 
-				SetWindowPos(_Dialog, nullptr, MonInfo.rcWork.left + MonWidth / 2 - Width / 2, MonInfo.rcWork.top + MonHeight / 2 - Height / 2, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+				SetWindowPos(_pDialog, nullptr, MonInfo.rcWork.left + MonWidth / 2 - Width / 2, MonInfo.rcWork.top + MonHeight / 2 - Height / 2, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 
-				SetTimer(_Dialog, 0, 100, nullptr);
-				BringWindowToTop(_Dialog);
-				SubSystem.m_DeadlockDetector.mp_CurrentDialogWindow = _Dialog;
+				SetTimer(_pDialog, 0, 100, nullptr);
+				BringWindowToTop(_pDialog);
+				SubSystem.m_DeadlockDetector.mp_pCurrentDialogWindow = _pDialog;
 				return 1;
 			}
 			break;
@@ -219,12 +219,12 @@ namespace NMib::NCrashReport::NPlatform
 				{
 					if (Control == EDialogID_Yes)
 					{
-						EndDialog(_Dialog, 1);
+						EndDialog(_pDialog, 1);
 						return 1;
 					}
 					else if (Control == EDialogID_No)
 					{
-						EndDialog(_Dialog, 335);
+						EndDialog(_pDialog, 335);
 						return 1;
 					}
 				}
@@ -234,9 +234,9 @@ namespace NMib::NCrashReport::NPlatform
 		return 0;
 	}
 
-	LRESULT CWindowsDeadlockDetector::fp_DisplayMyMessage(HINSTANCE _Instance, HWND _Owner, LPCSTR _pMessage, LPCSTR _pTitle)
+	LRESULT CWindowsDeadlockDetector::fp_DisplayMyMessage(HINSTANCE _pInstance, HWND _pOwner, LPCSTR _pMessage, LPCSTR _pTitle)
 	{
-		HGLOBAL GlobalMemory;
+		HGLOBAL pGlobalMemory;
 		LPDLGTEMPLATE pDialogTemplate;
 		LPDLGITEMTEMPLATE pItemTemplate;
 		LPWORD pWord;
@@ -244,11 +244,11 @@ namespace NMib::NCrashReport::NPlatform
 		LRESULT Result;
 		int nChars;
 
-		GlobalMemory = GlobalAlloc(GMEM_ZEROINIT, 2048);
-		if (!GlobalMemory)
+		pGlobalMemory = GlobalAlloc(GMEM_ZEROINIT, 2048);
+		if (!pGlobalMemory)
 			return -1;
 
-		pDialogTemplate = (LPDLGTEMPLATE)GlobalLock(GlobalMemory);
+		pDialogTemplate = (LPDLGTEMPLATE)GlobalLock(pGlobalMemory);
 
 		// Define a dialog box.
 
@@ -331,14 +331,14 @@ namespace NMib::NCrashReport::NPlatform
 		pWord = (LPWORD)NStr::fg_StrCopy((ch16 *)pWord, _pMessage);
 		*pWord++ = 0x0000; // Creation Data
 
-		GlobalUnlock(GlobalMemory);
+		GlobalUnlock(pGlobalMemory);
 
-		mp_NormalFont = fp_CreatePointFont(80, str_utf16("MS Sans Serif"));
-		Result = DialogBoxIndirect(_Instance, (LPDLGTEMPLATE) GlobalMemory, _Owner, (DLGPROC) fsp_HandleMessages);
-		mp_CurrentDialogWindow = nullptr;
-		DeleteObject(mp_NormalFont);
+		mp_pNormalFont = fp_CreatePointFont(80, str_utf16("MS Sans Serif"));
+		Result = DialogBoxIndirect(_pInstance, (LPDLGTEMPLATE) pGlobalMemory, _pOwner, (DLGPROC) fsp_HandleMessages);
+		mp_pCurrentDialogWindow = nullptr;
+		DeleteObject(mp_pNormalFont);
 
-		GlobalFree(GlobalMemory);
+		GlobalFree(pGlobalMemory);
 
 		return Result;
 	}
@@ -346,8 +346,8 @@ namespace NMib::NCrashReport::NPlatform
 	inline_never bool CWindowsDeadlockDetector::fp_DisplayMessage(NStr::CStr const &_Title, NStr::CStr const &_Message)
 	{
 		auto &SubSystem = *g_SubSystem_CrashReport_Platform_Windows_DeadlockDetector;
-		if (SubSystem.m_pDeadlockNotifyFunction)
-			return !SubSystem.m_pDeadlockNotifyFunction();
+		if (SubSystem.m_fDeadlockNotifyFunction)
+			return !SubSystem.m_fDeadlockNotifyFunction();
 		int Return = fp_DisplayMyMessage((HINSTANCE)nullptr, nullptr, _Message, _Title);
 
 		if (Return == -1)
@@ -365,9 +365,9 @@ bool NMib::NSys::fg_Debug_IsDeadlocked()
 	return NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_Windows_DeadlockDetector->f_Debug_IsDeadlocked();
 }
 
-void NMib::NSys::fg_Debug_SetDeadlockNotifyFunction(FDeadlockUserNotify *_pCrashDumpUserNotify)
+void NMib::NSys::fg_Debug_SetDeadlockNotifyFunction(FDeadlockUserNotify *_fCrashDumpUserNotify)
 {
-	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_Windows_DeadlockDetector->f_Debug_SetDeadlockUserNotifyFunction(_pCrashDumpUserNotify);
+	NMib::NCrashReport::NPlatform::g_SubSystem_CrashReport_Platform_Windows_DeadlockDetector->f_Debug_SetDeadlockUserNotifyFunction(_fCrashDumpUserNotify);
 }
 
 void NMib::NSys::fg_Debug_PauseDeadlockDetector()

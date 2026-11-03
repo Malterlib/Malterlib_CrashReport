@@ -78,15 +78,15 @@ namespace NMib::NCrashReport
 
 					CStr DestinationPath = RootDir / "CrashDumps" / FileInfo.m_Digest.f_GetString();
 
-					auto ReadCursor = WriteTransaction.m_Transaction.f_ReadCursor(NDebugDatabase::CCrashDumpKey::mc_Prefix, Params.m_ID, Params.m_FileName);
-					if (ReadCursor)
+					auto iReadCursor = WriteTransaction.m_Transaction.f_ReadCursor(NDebugDatabase::CCrashDumpKey::mc_Prefix, Params.m_ID, Params.m_FileName);
+					if (iReadCursor)
 					{
-						auto CrashDump = ReadCursor.f_Value<NDebugDatabase::CCrashDumpValue>();
+						auto CrashDump = iReadCursor.f_Value<NDebugDatabase::CCrashDumpValue>();
 						if (FileInfo.m_Digest != CrashDump.m_Digest)
 						{
 							if (Params.m_bForceOverwrite)
 							{
-								auto KeyToRemove = ReadCursor.f_Key<NDebugDatabase::CCrashDumpKey>();
+								auto KeyToRemove = iReadCursor.f_Key<NDebugDatabase::CCrashDumpKey>();
 								WriteTransaction = co_await NDebugDatabase::fg_DeleteCrashDump(fg_Move(WriteTransaction), KeyToRemove, RootDir);
 							}
 							else
