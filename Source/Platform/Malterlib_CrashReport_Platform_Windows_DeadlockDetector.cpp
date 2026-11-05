@@ -14,13 +14,6 @@ namespace NMib::NCrashReport::NPlatform
 		~CWindowsDeadlockDetector();
 
 	protected:
-		HFONT fp_CreatePointFontIndirect(LOGFONT const *_pLogFont);
-		HFONT fp_CreatePointFont(int _PointSize, LPCTSTR _pFaceName);
-
-		static INT_PTR CALLBACK fsp_HandleMessages(HWND _pDialog, UINT _Message, WPARAM _WParam, LPARAM _LParam);
-		LRESULT fp_DisplayMyMessage(HINSTANCE _pInstance, HWND _pOwner, LPCSTR _pMessage, LPCSTR _pTitle);
-		inline_never bool fp_DisplayMessage(NStr::CStr const &_Title, NStr::CStr const &_Message);
-
 		enum EDialogID
 		{
 			EDialogID_Help   = 150
@@ -29,56 +22,71 @@ namespace NMib::NCrashReport::NPlatform
 			, EDialogID_No
 		};
 
+		HFONT fp_CreatePointFontIndirect(LOGFONT const *_pLogFont);
+		HFONT fp_CreatePointFont(int _PointSize, LPCTSTR _pFaceName);
+
+		static INT_PTR CALLBACK fsp_HandleMessages(HWND _pDialog, UINT _Message, WPARAM _WParam, LPARAM _LParam);
+		LRESULT fp_DisplayMyMessage(HINSTANCE _pInstance, HWND _pOwner, LPCSTR _pMessage, LPCSTR _pTitle);
+		inline_never bool fp_DisplayMessage(NStr::CStr const &_Title, NStr::CStr const &_Message);
+
 		HWND mp_pCurrentDialogWindow;
 		HFONT mp_pNormalFont;
 	};
 
 	struct CSubSystem_CrashReport_Platform_Windows_DeadlockDetector : public CSubSystem
 	{
+		void f_Debug_SetDeadlockUserNotifyFunction(NSys::FDeadlockUserNotify *_fDeadlockNotifyFunction);
+		void f_Debug_StartDeadlockDetector(fp64 _Timeout);
+		void f_Debug_NotDeadlocked();
+		void f_Debug_StopDeadlockDetector();
+		void f_Debug_PauseDeadlockDetector();
+		void f_Debug_ResumeDeadlockDetector();
+		bool f_Debug_IsDeadlocked();
+
 		CWindowsDeadlockDetector m_DeadlockDetector;
 		NSys::FDeadlockUserNotify *m_fDeadlockNotifyFunction = nullptr;
-
-		void f_Debug_SetDeadlockUserNotifyFunction(NSys::FDeadlockUserNotify *_fDeadlockNotifyFunction)
-		{
-			m_fDeadlockNotifyFunction = _fDeadlockNotifyFunction;
-		}
-
-		void f_Debug_StartDeadlockDetector(fp64 _Timeout)
-		{
-			m_DeadlockDetector.f_SetTimeout(_Timeout);
-			if (m_DeadlockDetector.f_GetState() != NThread::EThreadState_Running)
-				m_DeadlockDetector.f_Start();
-		}
-
-		void f_Debug_NotDeadlocked()
-		{
-			m_DeadlockDetector.f_Pulse();
-		}
-
-		void f_Debug_StopDeadlockDetector()
-		{
-			m_DeadlockDetector.f_Stop(true);
-		}
-
-		void f_Debug_PauseDeadlockDetector()
-		{
-			m_DeadlockDetector.f_AddPauseValue();
-		}
-
-		void f_Debug_ResumeDeadlockDetector()
-		{
-			aint LastValue = m_DeadlockDetector.f_LastPauseValue();
-			if (LastValue == 1)
-				m_DeadlockDetector.f_Pulse();
-
-			DMibSafeCheck(LastValue > 0, "Pause error");
-		}
-
-		bool f_Debug_IsDeadlocked()
-		{
-			return m_DeadlockDetector.f_IsDeadlocked();
-		}
 	};
+
+	void CSubSystem_CrashReport_Platform_Windows_DeadlockDetector::f_Debug_SetDeadlockUserNotifyFunction(NSys::FDeadlockUserNotify *_fDeadlockNotifyFunction)
+	{
+		m_fDeadlockNotifyFunction = _fDeadlockNotifyFunction;
+	}
+
+	void CSubSystem_CrashReport_Platform_Windows_DeadlockDetector::f_Debug_StartDeadlockDetector(fp64 _Timeout)
+	{
+		m_DeadlockDetector.f_SetTimeout(_Timeout);
+		if (m_DeadlockDetector.f_GetState() != NThread::EThreadState_Running)
+			m_DeadlockDetector.f_Start();
+	}
+
+	void CSubSystem_CrashReport_Platform_Windows_DeadlockDetector::f_Debug_NotDeadlocked()
+	{
+		m_DeadlockDetector.f_Pulse();
+	}
+
+	void CSubSystem_CrashReport_Platform_Windows_DeadlockDetector::f_Debug_StopDeadlockDetector()
+	{
+		m_DeadlockDetector.f_Stop(true);
+	}
+
+	void CSubSystem_CrashReport_Platform_Windows_DeadlockDetector::f_Debug_PauseDeadlockDetector()
+	{
+		m_DeadlockDetector.f_AddPauseValue();
+	}
+
+	void CSubSystem_CrashReport_Platform_Windows_DeadlockDetector::f_Debug_ResumeDeadlockDetector()
+	{
+		aint LastValue = m_DeadlockDetector.f_LastPauseValue();
+		if (LastValue == 1)
+			m_DeadlockDetector.f_Pulse();
+
+		DMibSafeCheck(LastValue > 0, "Pause error");
+	}
+
+	bool CSubSystem_CrashReport_Platform_Windows_DeadlockDetector::f_Debug_IsDeadlocked()
+	{
+		return m_DeadlockDetector.f_IsDeadlocked();
+	}
 
 	constinit TCSubSystem<CSubSystem_CrashReport_Platform_Windows_DeadlockDetector, ESubSystemDestruction_BeforeNonTrackedMemoryManager>
 		g_SubSystem_CrashReport_Platform_Windows_DeadlockDetector = {DAggregateInit}
