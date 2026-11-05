@@ -135,9 +135,9 @@ namespace NMib::NCrashReport
 		static bool fs_IsValidString(NStr::CStr const &_String);
 
 	private:
-		NConcurrency::TCFuture<void> fp_Destroy() override;
-
 		struct CInternal;
+
+		NConcurrency::TCFuture<void> fp_Destroy() override;
 
 		NStorage::TCUniquePointer<CInternal> mp_pInternal;
 	};
