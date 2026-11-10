@@ -46,10 +46,8 @@ namespace
 		DMibTestCategoryFlags(CTestCategory("Crash") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
 		{
 			DMibTrace("Crashing\n", 0);
-#ifndef DMibClangAnalyzerWorkaround
 			int *pTest = 0;
 			*pTest = 0;
-#endif
 		};
 		DMibTestCategoryFlags(CTestCategory("Breakpoint") << CTestGroup("Manual"), ETestCategoryFlag_DisableExceptionFilter | ETestCategoryFlag_Tests)
 		{
