@@ -15,174 +15,180 @@ namespace NMib::NCrashReport
 
 	struct CUploader::CDetails
 	{
-		CDetails()
-		{
-			curl_global_init(CURL_GLOBAL_ALL);
-		}
+		CDetails();
+		~CDetails();
 
-		~CDetails()
-		{
-			curl_global_cleanup();
-		}
-
-		bool f_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, CUploadContext const &_Context, NMib::NStr::CStr &o_Errors)
-		{
-			NMib::NStr::CStr DumpDirectory = _DumpDirectory;
-			if (!DumpDirectory.f_GetLen() || DumpDirectory[DumpDirectory.f_GetLen() - 1] != '/')
-				DumpDirectory += "/";
-
-			mp_UploadLockFile.f_SetLockFile(DumpDirectory + "UploadLock", NFile::EFileOpen_Write);
-
-			NMib::NFile::CLockFile::ELockResult LockResult = mp_UploadLockFile.f_Lock(0.25);
-			switch (LockResult)
-			{
-			case NFile::CLockFile::ELockResult_NoAccess:
-				o_Errors += "You do not have the required permissions for the dump directory\r\n";
-				return false;
-			case NFile::CLockFile::ELockResult_DoesNotExist:
-				o_Errors += NMib::NStr::CStr::CFormat("Dump directory ({}) does not exist\r\n") << DumpDirectory;
-				return false;
-			case NFile::CLockFile::ELockResult_TimedOut:
-				o_Errors += "Unable to upload dumps. Either another process is already uploading the dumps or you have insufficient permissions.\r\n";
-				return false;
-			case NFile::CLockFile::ELockResult_Locked: break;
-			default: DNeverGetHere;
-			}
-
-			auto LockUnlock = fg_OnScopeExit
-				(
-					[this]()
-					{
-						mp_UploadLockFile.f_Unlock();
-					}
-				)
-			;
-
-			CUploadContext PerDumpContext = _Context;
-
-			NMib::NContainer::TCVector<CStr> DumpFiles = NMib::NFile::CFile::fs_FindFiles(DumpDirectory + "*", EFileAttrib_File, true);
-			for (auto iFile = DumpFiles.f_GetIterator(); iFile; ++iFile)
-			{
-				PerDumpContext.m_PathToDumpFile = *iFile;
-				if (NMib::NFile::CFile::fs_GetExtension(PerDumpContext.m_PathToDumpFile) == "dmp")
-					f_SendCrashReport(PerDumpContext, o_Errors);
-			}
-
-			if (o_Errors.f_IsEmpty())
-				return true;
-
-			return false;
-		}
-
-		bool f_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &o_Errors)
-		{
-			if (!NMib::NFile::CFile::fs_FileExists(_Context.m_PathToDumpFile, NMib::NFile::EFileAttrib_File))
-			{
-				o_Errors += NMib::NStr::CStr::CFormat("No dump file with the name {} exists.\r\n") << _Context.m_PathToDumpFile;
-				return false;
-			}
-
-			if (_Context.m_PathToDumpFile.f_FindNoCase("FullDump") >= 0)
-			{
-				o_Errors += NMib::NStr::CStr::CFormat("Sending full dumps is not supported. Please contact support for details on how to send {} manually.\r\n") << _Context.m_PathToDumpFile;
-				return false;
-			}
-
-			try
-			{
-				static constexpr int c_nMaxBytes = 1024 * 1024 * 4; // Max 4MB
-
-				aint nBytes = NMib::NFile::CFile::fs_GetFileSize(_Context.m_PathToDumpFile);
-				if (nBytes > c_nMaxBytes)
-				{
-					o_Errors
-						+= NMib::NStr::CStr::CFormat("The dump ({}) size exceeds the maximum allowed. Please contact support for details on how to send this dump manually.\r\n")
-						<< _Context.m_PathToDumpFile
-					;
-					return false;
-				}
-			}
-			catch (NMib::NFile::CExceptionFile const &_Exception)
-			{
-				o_Errors += NMib::NStr::CStr::CFormat("An error occured whilst verifying dump size: {}\r\n") << _Exception.f_GetErrorStr();
-				return false;
-			}
-
-			CURL *pCurl = curl_easy_init();
-			if (!pCurl)
-			{
-				o_Errors += "libcurl was not initialised\r\n";
-				return false;
-			}
-
-			struct curl_httppost *pFormPost = nullptr;
-			struct curl_httppost *pLastPtr = nullptr;
-
-			curl_easy_setopt(pCurl, CURLOPT_URL, _Context.m_CrashServer.f_GetStr());
-
-			// Add the parameters
-			{
-				for (auto iParam = _Context.m_Parameters.f_GetIterator(); iParam; ++iParam)
-				{
-					NMib::NStr::CStr Key = iParam.f_GetKey();
-					NMib::NStr::CStr Value = *iParam;
-
-					curl_formadd(&pFormPost, &pLastPtr, CURLFORM_COPYNAME, Key.f_GetStr(), CURLFORM_COPYCONTENTS, Value.f_GetStr(), CURLFORM_END);
-				}
-			}
-
-			// Add the dump file
-			{
-				curl_formadd(&pFormPost, &pLastPtr, CURLFORM_COPYNAME, "upload_file_minidump", CURLFORM_FILE, _Context.m_PathToDumpFile.f_GetStr(), CURLFORM_END);
-			}
-
-			struct curl_slist *pHeaderList = nullptr;
-			char Buffer[] = "Expect:";
-			pHeaderList = curl_slist_append(pHeaderList, Buffer);
-			curl_easy_setopt(pCurl, CURLOPT_HTTPHEADER, pHeaderList);
-
-			curl_easy_setopt(pCurl, CURLOPT_HTTPPOST, pFormPost);
-			curl_easy_setopt(pCurl, CURLOPT_FAILONERROR, 1);
-			curl_easy_setopt(pCurl, CURLOPT_WRITEFUNCTION, &fg_WriteCallback);
-
-			char ErrorBuffer[CURL_ERROR_SIZE] = {0};
-			curl_easy_setopt(pCurl, CURLOPT_ERRORBUFFER, &ErrorBuffer);
-
-			CURLcode Result = curl_easy_perform(pCurl);
-			bool bSuccess = Result == CURLE_OK;
-
-			if (!bSuccess)
-			{
-				o_Errors += NMib::NStr::CStr::CFormat("Error occured while sending dump ({}): {}\n") << _Context.m_PathToDumpFile << curl_easy_strerror(Result);
-				if (ErrorBuffer[0])
-					o_Errors += NMib::NStr::CStr::CFormat("Error message: {}\n") << ErrorBuffer;
-			}
-			else
-			{
-				try
-				{
-					NMib::NFile::CFile::fs_DeleteFile(_Context.m_PathToDumpFile);
-				}
-				catch (NMib::NFile::CExceptionFile const &_Exception)
-				{
-					o_Errors
-						+= NMib::NStr::CStr::CFormat("An error occured whilst attempting to delete dump file ({}) after sending. The error reported was: {}\r\n")
-						<< _Context.m_PathToDumpFile
-						<< _Exception.f_GetErrorStr()
-					;
-				}
-			}
-
-			curl_easy_cleanup(pCurl);
-			curl_formfree(pFormPost);
-			curl_slist_free_all(pHeaderList);
-
-			return bSuccess;
-		}
+		bool f_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, CUploadContext const &_Context, NMib::NStr::CStr &o_Errors);
+		bool f_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &o_Errors);
 
 	protected:
 		NMib::NFile::CLockFile mp_UploadLockFile;
 	};
+
+	CUploader::CDetails::CDetails()
+	{
+		curl_global_init(CURL_GLOBAL_ALL);
+	}
+
+	CUploader::CDetails::~CDetails()
+	{
+		curl_global_cleanup();
+	}
+
+	bool CUploader::CDetails::f_SendCrashReports(NMib::NStr::CStr const &_DumpDirectory, CUploadContext const &_Context, NMib::NStr::CStr &o_Errors)
+	{
+		NMib::NStr::CStr DumpDirectory = _DumpDirectory;
+		if (!DumpDirectory.f_GetLen() || DumpDirectory[DumpDirectory.f_GetLen() - 1] != '/')
+			DumpDirectory += "/";
+
+		mp_UploadLockFile.f_SetLockFile(DumpDirectory + "UploadLock", NFile::EFileOpen_Write);
+
+		NMib::NFile::CLockFile::ELockResult LockResult = mp_UploadLockFile.f_Lock(0.25);
+		switch (LockResult)
+		{
+		case NFile::CLockFile::ELockResult_NoAccess:
+			o_Errors += "You do not have the required permissions for the dump directory\r\n";
+			return false;
+		case NFile::CLockFile::ELockResult_DoesNotExist:
+			o_Errors += NMib::NStr::CStr::CFormat("Dump directory ({}) does not exist\r\n") << DumpDirectory;
+			return false;
+		case NFile::CLockFile::ELockResult_TimedOut:
+			o_Errors += "Unable to upload dumps. Either another process is already uploading the dumps or you have insufficient permissions.\r\n";
+			return false;
+		case NFile::CLockFile::ELockResult_Locked: break;
+		default: DNeverGetHere;
+		}
+
+		auto LockUnlock = fg_OnScopeExit
+			(
+				[this]()
+				{
+					mp_UploadLockFile.f_Unlock();
+				}
+			)
+		;
+
+		CUploadContext PerDumpContext = _Context;
+
+		NMib::NContainer::TCVector<CStr> DumpFiles = NMib::NFile::CFile::fs_FindFiles(DumpDirectory + "*", EFileAttrib_File, true);
+		for (auto iFile = DumpFiles.f_GetIterator(); iFile; ++iFile)
+		{
+			PerDumpContext.m_PathToDumpFile = *iFile;
+			if (NMib::NFile::CFile::fs_GetExtension(PerDumpContext.m_PathToDumpFile) == "dmp")
+				f_SendCrashReport(PerDumpContext, o_Errors);
+		}
+
+		if (o_Errors.f_IsEmpty())
+			return true;
+
+		return false;
+	}
+
+	bool CUploader::CDetails::f_SendCrashReport(CUploadContext const &_Context, NMib::NStr::CStr &o_Errors)
+	{
+		if (!NMib::NFile::CFile::fs_FileExists(_Context.m_PathToDumpFile, NMib::NFile::EFileAttrib_File))
+		{
+			o_Errors += NMib::NStr::CStr::CFormat("No dump file with the name {} exists.\r\n") << _Context.m_PathToDumpFile;
+			return false;
+		}
+
+		if (_Context.m_PathToDumpFile.f_FindNoCase("FullDump") >= 0)
+		{
+			o_Errors += NMib::NStr::CStr::CFormat("Sending full dumps is not supported. Please contact support for details on how to send {} manually.\r\n") << _Context.m_PathToDumpFile;
+			return false;
+		}
+
+		try
+		{
+			static constexpr int c_nMaxBytes = 1024 * 1024 * 4; // Max 4MB
+
+			aint nBytes = NMib::NFile::CFile::fs_GetFileSize(_Context.m_PathToDumpFile);
+			if (nBytes > c_nMaxBytes)
+			{
+				o_Errors
+					+= NMib::NStr::CStr::CFormat("The dump ({}) size exceeds the maximum allowed. Please contact support for details on how to send this dump manually.\r\n")
+					<< _Context.m_PathToDumpFile
+				;
+				return false;
+			}
+		}
+		catch (NMib::NFile::CExceptionFile const &_Exception)
+		{
+			o_Errors += NMib::NStr::CStr::CFormat("An error occured whilst verifying dump size: {}\r\n") << _Exception.f_GetErrorStr();
+			return false;
+		}
+
+		CURL *pCurl = curl_easy_init();
+		if (!pCurl)
+		{
+			o_Errors += "libcurl was not initialised\r\n";
+			return false;
+		}
+
+		struct curl_httppost *pFormPost = nullptr;
+		struct curl_httppost *pLastPtr = nullptr;
+
+		curl_easy_setopt(pCurl, CURLOPT_URL, _Context.m_CrashServer.f_GetStr());
+
+		// Add the parameters
+		{
+			for (auto iParam = _Context.m_Parameters.f_GetIterator(); iParam; ++iParam)
+			{
+				NMib::NStr::CStr Key = iParam.f_GetKey();
+				NMib::NStr::CStr Value = *iParam;
+
+				curl_formadd(&pFormPost, &pLastPtr, CURLFORM_COPYNAME, Key.f_GetStr(), CURLFORM_COPYCONTENTS, Value.f_GetStr(), CURLFORM_END);
+			}
+		}
+
+		// Add the dump file
+		{
+			curl_formadd(&pFormPost, &pLastPtr, CURLFORM_COPYNAME, "upload_file_minidump", CURLFORM_FILE, _Context.m_PathToDumpFile.f_GetStr(), CURLFORM_END);
+		}
+
+		struct curl_slist *pHeaderList = nullptr;
+		char Buffer[] = "Expect:";
+		pHeaderList = curl_slist_append(pHeaderList, Buffer);
+		curl_easy_setopt(pCurl, CURLOPT_HTTPHEADER, pHeaderList);
+
+		curl_easy_setopt(pCurl, CURLOPT_HTTPPOST, pFormPost);
+		curl_easy_setopt(pCurl, CURLOPT_FAILONERROR, 1);
+		curl_easy_setopt(pCurl, CURLOPT_WRITEFUNCTION, &fg_WriteCallback);
+
+		char ErrorBuffer[CURL_ERROR_SIZE] = {0};
+		curl_easy_setopt(pCurl, CURLOPT_ERRORBUFFER, &ErrorBuffer);
+
+		CURLcode Result = curl_easy_perform(pCurl);
+		bool bSuccess = Result == CURLE_OK;
+
+		if (!bSuccess)
+		{
+			o_Errors += NMib::NStr::CStr::CFormat("Error occured while sending dump ({}): {}\n") << _Context.m_PathToDumpFile << curl_easy_strerror(Result);
+			if (ErrorBuffer[0])
+				o_Errors += NMib::NStr::CStr::CFormat("Error message: {}\n") << ErrorBuffer;
+		}
+		else
+		{
+			try
+			{
+				NMib::NFile::CFile::fs_DeleteFile(_Context.m_PathToDumpFile);
+			}
+			catch (NMib::NFile::CExceptionFile const &_Exception)
+			{
+				o_Errors
+					+= NMib::NStr::CStr::CFormat("An error occured whilst attempting to delete dump file ({}) after sending. The error reported was: {}\r\n")
+					<< _Context.m_PathToDumpFile
+					<< _Exception.f_GetErrorStr()
+				;
+			}
+		}
+
+		curl_easy_cleanup(pCurl);
+		curl_formfree(pFormPost);
+		curl_slist_free_all(pHeaderList);
+
+		return bSuccess;
+	}
 
 	CUploader::CUploader()
 		: mp_pDetails(fg_Construct())
